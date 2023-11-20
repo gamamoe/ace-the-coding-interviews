@@ -180,3 +180,104 @@ def solution(array: List[int]) -> int:
         else:
             return most_common_element[0]
 ```
+
+### [OX퀴즈](https://school.programmers.co.kr/learn/courses/30/lessons/120907)
+
+좀 복잡하게 풀이했는 데, 다른 사람 풀이 + 문제 조건에 공백 문자를 캐치하여 split 후 검증하면 좀 더 깔끔하게 작성 가능 
+
+```python
+from typing import List
+
+
+def solution(quiz: List[str]) -> List[str]:
+    answer = []
+
+    for equation in quiz:
+        first_operand = []
+        second_operand = []
+
+        index = 0
+        while (char := equation[index]) != " ":
+            first_operand.append(char)
+            index += 1
+
+        index += 1
+        operator = equation[index]
+        index += 2
+
+        while (char := equation[index]) != " ":
+            second_operand.append(char)
+            index += 1
+
+        index += 3
+        expected_result = []
+        for char in equation[index:]:
+            expected_result.append(char)
+
+        first_operand = int("".join(first_operand))
+        second_operand = int("".join(second_operand))
+        expected_result = int("".join(expected_result))
+        if operator == "+":
+            if first_operand + second_operand == expected_result:
+                answer.append("O")
+            else:
+                answer.append("X")
+        else:
+            if first_operand - second_operand == expected_result:
+                answer.append("O")
+            else:
+                answer.append("X")
+
+    return answer
+```
+
+### Private 기출 문제
+
+```python
+import collections
+from typing import List
+
+
+def solution(A: List[int]) -> int:
+    my_dict = collections.defaultdict(collections.deque)
+
+    for element in A:
+        str_element = str(element)
+        key = f"{str_element[0]}{str_element[-1]}"
+
+        if val := my_dict.get(key):
+            if len(val) == 1:
+                if element > val[0]:
+                    val.append(element)
+                else:
+                    val.appendleft(element)
+            else:  # len(val) == 2:
+                if val[0] < element <= val[1]:
+                    val.popleft()
+                    val.appendleft(element)
+                elif val[1] < element:
+                    val.popleft()
+                    val.append(element)
+                else:
+                    continue
+        else:
+            my_dict[key] = collections.deque([element])
+
+    answer = -1
+    for elements in my_dict.values():
+        if len(elements) == 1:
+            continue
+
+        answer = max(answer, elements[0] + elements[1])
+
+    return answer
+
+A1 = [130, 191, 200, 10]  # 140
+print(solution(A1))
+A2 = [405, 45, 300, 300]  # 600
+print(solution(A2))
+A3 = [50, 222, 49, 52, 25]  # -1
+print(solution(A3))
+A4 = [30, 909, 3190, 99, 3990, 9009]  # 9918
+print(solution(A4))
+```
