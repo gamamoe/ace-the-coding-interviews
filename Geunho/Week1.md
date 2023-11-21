@@ -281,3 +281,27 @@ print(solution(A3))
 A4 = [30, 909, 3190, 99, 3990, 9009]  # 9918
 print(solution(A4))
 ```
+
+### [특이한 정렬](https://school.programmers.co.kr/learn/courses/30/lessons/120880)
+
+다소 아쉬운 풀이 lambda를 잘 활용하면 더 깔끔하게 풀이 가능
+
+```python
+from operator import itemgetter
+from typing import List
+
+
+def solution(numlist: List[int], n: int) -> List[int]:
+    diff_num_list = [(abs(n - x), -x) for x in numlist]
+    sorted_num_list = sorted(diff_num_list, key=itemgetter(0, 1))
+    return [-x[1] for x in sorted_num_list]
+```
+
+더 나은 코드
+```python
+from typing import List
+
+
+def solution(numlist: List[int], n: int) -> List[int]:
+    return sorted(numlist, key=lambda x: (abs(n - x), -x))
+```
