@@ -305,3 +305,39 @@ from typing import List
 def solution(numlist: List[int], n: int) -> List[int]:
     return sorted(numlist, key=lambda x: (abs(n - x), -x))
 ```
+
+### [안전지대](https://school.programmers.co.kr/learn/courses/30/lessons/120866)
+
+전체 좌표 갯수를 구하고, 지뢰와 지뢰 인접 좌표를 빼서 안전한 좌표를 구하는 문제  
+위험 좌표는 지뢰 위치에 따라 겹칠 수 있으므로 set을 통해서 고유 좌표들만 관리하는 것이 중요하며  
+인접 좌표 계산 시 board의 가능한 영역을 벗어나지 않는 조건 체크만 잘 하면 된다
+
+```python
+from typing import List
+
+
+def solution(board: List[List[int]]) -> int:
+    n = len(board)
+    total_num_of_coordinates = n * n
+    risky_coordinates = set()
+
+    for y in range(n):
+        for x in range(n):
+            if board[y][x] == 1:
+                risky_coordinates.add((y, x))
+
+                for dy, dx in [
+                    (-1, -1),
+                    (-1, 0),
+                    (-1, 1),
+                    (0, 1),
+                    (1, 1),
+                    (1, 0),
+                    (1, -1),
+                    (0, -1),
+                ]:
+                    if 0 <= y + dy < n and 0 <= x + dx < n:
+                        risky_coordinates.add((y + dy, x + dx))
+
+    return total_num_of_coordinates - len(risky_coordinates)
+```
