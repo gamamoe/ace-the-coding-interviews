@@ -341,3 +341,36 @@ def solution(board: List[List[int]]) -> int:
 
     return total_num_of_coordinates - len(risky_coordinates)
 ```
+
+### [다항식 더하기](https://school.programmers.co.kr/learn/courses/30/lessons/120863)
+
+마지막 문자가 x인지 체크하는 방식으로 상수를 구분했는데, 다른 풀이의 `isdigit`을 활용하는 것도 좋아보임
+
+```python
+def solution(polynomial: str) -> str:
+    tokens = polynomial.split(" + ")
+
+    weight = 0
+    bias = 0
+    for token in tokens:
+        if token[-1] == "x":
+            if len(token) == 1:
+                weight += 1
+            else:
+                weight += int(token[:-1])
+        else:
+            bias += int(token)
+
+    if weight == 0:
+        weight_term = ""
+    elif weight == 1:
+        weight_term = "x"
+    else:
+        weight_term = f"{weight}x"
+
+    bias_term = "" if bias == 0 else str(bias)
+    equation = [weight_term, bias_term]
+    equation = [term for term in equation if term]
+
+    return " + ".join(equation)
+```
