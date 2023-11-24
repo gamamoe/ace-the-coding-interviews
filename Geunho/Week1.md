@@ -374,3 +374,22 @@ def solution(polynomial: str) -> str:
 
     return " + ".join(equation)
 ```
+
+### [문자열 밀기](https://school.programmers.co.kr/learn/courses/30/lessons/120921)
+
+0 < len(A) == len(B) < 100으로 문제 조건이 널널한 편이므로 단순 구현으로 쉽게 해결 가능  
+deque 자료구조의 rotate 메서드나 find 메서드를 이용해서도 풀 수 있다
+
+```python
+def solution(A: str, B: str) -> int:
+    if A == B:
+        return 0
+
+    for i in range(len(A)):
+        A = f"{A[-1]}{A[:-1]}"
+
+        if A == B:
+            return i + 1
+
+    return -1
+```
