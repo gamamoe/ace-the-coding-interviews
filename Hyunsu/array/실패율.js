@@ -11,8 +11,7 @@ function solution(N, stages) {
   let failure;
   let completedPlayersNum = stages.length;
   for (let i = 1; i < count.length; i++) {
-    failure =
-      completedPlayersNum == 0 ? 0 : (failure = count[i] / completedPlayersNum);
+    failure = completedPlayersNum == 0 ? 0 : count[i] / completedPlayersNum;
     failureRates.push([i, failure]);
     completedPlayersNum -= count[i];
   }
