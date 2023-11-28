@@ -16,19 +16,6 @@ arr2 = [2,1,1,3,2,5,4]
 arr3 = [6,1,7]
 
 
-def check():
-    if solution(arr1) == [-5,1,2,3,4]:
-        print(True)
-    else:
-        print(False)
-    if solution(arr2) == [1,1,2,2,3,4,5]:
-        print(True)
-    else:
-        print(False)
-    if solution(arr3) == [1,6,7]:
-        print(True)
-    else:
-        print(False)
-
-
-check()
+assert solution(arr1) == [-5,1,2,3,4], '출력값1 에러'
+assert solution(arr2) == [1,1,2,2,3,4,5], '출력값2 에러'
+assert solution(arr3) == [1,6,7], '출력값3 에러'
