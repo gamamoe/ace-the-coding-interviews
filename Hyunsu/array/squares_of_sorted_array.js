@@ -23,7 +23,7 @@ function solution1(nums) {
   const result = Array(nums.length).fill(0);
   let left = 0,
     right = nums.length - 1;
-  let index = nums.length - 1; // 가장 큰 수를 마지막 인덱스로 넣기 위함.
+  let index = nums.length - 1; // 가장 큰 수를 배열의 끝에서부터 채워나가기 위함.
 
   while (left <= right) {
     if (Math.abs(nums[left]) >= Math.abs(nums[right])) {

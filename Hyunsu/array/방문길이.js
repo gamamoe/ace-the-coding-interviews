@@ -84,8 +84,8 @@ function solution1(dirs) {
   for (const dir of dirs) {
     const index = direction[dir];
     const [currentX, currentY] = current;
-    const nx = current[0] + dx[index];
-    const ny = current[1] + dy[index];
+    const nx = currentX + dx[index];
+    const ny = currentY + dy[index];
 
     if (nx < 0 || ny < 0 || nx > 10 || ny > 10) continue;
 
