@@ -65,8 +65,6 @@ function solution1(answers) {
     studentPatterns.forEach((pattern, studentId) => {
       if (isCorrect(pattern, answers, i)) {
         studentTestResult[studentId] += 1;
-        if (max < studentTestResult[studentId]) {
-        }
         max = Math.max(max, studentTestResult[studentId]);
       }
     });
