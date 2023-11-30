@@ -283,3 +283,42 @@ def solution(arr: List[int], divisor: int) -> List[int]:
     divisible_elements = [x for x in arr if x % divisor == 0]
     return sorted(divisible_elements) or [-1]
 ```
+
+### [n^2 배열 자르기](https://school.programmers.co.kr/learn/courses/30/lessons/87390)
+
+이 문제는 우선 규칙을 이해하는 게 먼저이고, 그것을 구현하는 문제  
+나이브하게 n by n 행렬을 할당 후 채워서 slicing을 하면 공간복잡도에서 런타임 에러 발생  
+규칙을 파악하여 필요한 공간에 해당하는 값만 계산 후 리턴해야 통과된다
+
+```python
+from typing import List
+
+
+# def solution(n: int, left: int, right: int) -> List[int]:
+#     answer = [0] * (n * n)
+#
+#     for row in range(n):
+#         for col in range(row + 1):
+#             answer[n * row + col] = row + 1
+#
+#         for col in range(row + 1, n):
+#             answer[n * row + col] = col + 1
+#
+#     return answer[left : right + 1]
+
+
+def solution(n: int, left: int, right: int) -> List[int]:
+    answer = []
+
+    for index in range(left, right + 1):
+        row, col = divmod(index, n)
+        val = row + 1 if row >= col else col + 1
+        answer.append(val)
+    print(answer)
+    return answer
+
+
+assert solution(3, 2, 5) == [3, 2, 2, 3]
+assert solution(4, 7, 14) == [4, 3, 3, 3, 4, 4, 4, 4]
+assert solution(100, 7, 31) == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+```
