@@ -1,6 +1,10 @@
+from collections import Counter
+
+
 def solution(N, stages):
     # 1 ~ N+1 challenger count
-    challenger = [0] * (N+2)
+    # challenger = [0] * (N+2)
+    challenger = Counter()
     for stage in stages:  # O(n)
         challenger[stage] += 1
     print(challenger)
