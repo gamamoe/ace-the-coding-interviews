@@ -139,3 +139,82 @@ def solution(prices: List[int]) -> List[int]:
 
     return answer
 ```
+
+아래는 O(N) 풀이 방법, 특정 시점에서 가격 하락을 감지하면 앞의 원소들 중 해당 가격보다 큰 값은 한 번에 계산하는 것이 핵심  
+이 때 시간상으로 앞의 원소들을 보므로 스택을 떠올릴 수 있어야한다
+
+```python
+from typing import List
+
+
+def solution(prices: List[int]) -> List[int]:
+    answer = [0] * len(prices)
+    stack = []
+
+    for index, price in enumerate(prices):
+        if not stack:
+            stack.append(index)
+            continue
+
+        while stack and prices[stack[-1]] > price:
+            answer[stack[-1]] = index - stack[-1]
+            stack.pop()
+        stack.append(index)
+
+    for index in stack:
+        answer[index] = (len(prices) - 1) - index
+
+    return answer
+```
+
+#### [크레인 인형 뽑기 게임](https://school.programmers.co.kr/learn/courses/30/lessons/64061)
+
+풀이하고 나니 저자의 풀이와 동일한 사고의 흐름이라 짜릿했음 ㅎ  
+보드의 열을 각각의 스택으로 관리하고, bucket에서 인접한 동일 인형 index라면 answer 를 2씩 증가시켜주면 된다  
+문제 내에서 스택을 써!라는 힌트를 굉장히 많이주는 케이스
+
+```python
+from typing import List
+
+
+def solution(board: List[List[int]], moves: List[int]) -> int:
+    n = len(board)
+    columns = []
+    for i in range(n):
+        column = []
+        for j in range(n - 1, -1, -1):
+            if val := board[j][i]:
+                column.append(val)
+        columns.append(column)
+
+    stack = []
+    answer = 0
+    for move in moves:
+        target_column = columns[move - 1]
+        if not target_column:
+            continue
+
+        doll = target_column.pop()
+        if stack and stack[-1] == doll:
+            stack.pop()
+            answer += 2
+        else:
+            stack.append(doll)
+
+    return answer
+
+
+assert (
+    solution(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 3],
+            [0, 2, 5, 0, 1],
+            [4, 2, 4, 4, 2],
+            [3, 5, 1, 3, 1],
+        ],
+        [1, 5, 3, 5, 1, 2, 1, 4],
+    )
+    == 4
+)
+```
