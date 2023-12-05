@@ -116,3 +116,26 @@ assert solution("baabaa") == 1
 assert solution("cdcd") == 0
 ```
 
+#### [주식 가격](https://school.programmers.co.kr/learn/courses/30/lessons/42584)
+
+O(N^2) 풀이, 프로그래머스 기준으로 통과는 가능하나 선형 시간복잡도로 다시 풀어볼 것
+
+```python
+from typing import List
+
+
+def solution(prices: List[int]) -> List[int]:
+    answer = []
+
+    num_of_prices = len(prices)
+    for i in range(num_of_prices):
+        seconds = 0
+        for j in range(i + 1, num_of_prices):
+            seconds += 1
+            if prices[i] > prices[j]:
+                break
+
+        answer.append(seconds)
+
+    return answer
+```
