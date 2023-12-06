@@ -218,3 +218,25 @@ assert (
     == 4
 )
 ```
+
+#### 요세푸스 문제
+
+제거할 원소 앞의 원소들을 큐의 뒤쪽에 다시 집어 넣고, 제거를 반복하는 아이디어를 생각하는 게 중요한 문제
+
+```python
+from collections import deque
+
+
+def solution(n: int, k: int) -> int:
+    queue = deque([x for x in range(1, n + 1)])
+
+    while len(queue) > 1:
+        for _ in range(k - 1):
+            queue.append(queue.popleft())
+        queue.popleft()
+
+    return queue.popleft()
+
+
+assert solution(5, 2) == 3
+```
