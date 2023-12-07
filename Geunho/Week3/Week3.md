@@ -218,3 +218,108 @@ assert (
     == 4
 )
 ```
+
+#### 요세푸스 문제
+
+제거할 원소 앞의 원소들을 큐의 뒤쪽에 다시 집어 넣고, 제거를 반복하는 아이디어를 생각하는 게 중요한 문제
+
+```python
+from collections import deque
+
+
+def solution(n: int, k: int) -> int:
+    queue = deque([x for x in range(1, n + 1)])
+
+    while len(queue) > 1:
+        for _ in range(k - 1):
+            queue.append(queue.popleft())
+        queue.popleft()
+
+    return queue.popleft()
+
+
+assert solution(5, 2) == 3
+```
+
+#### [기능개발](https://school.programmers.co.kr/learn/courses/30/lessons/42586)
+
+책의 풀이와는 약간 다르게 풀었음. 항상 첫 번째 원소를 기준으로 배포일을 계산하고  
+뒤의 작업들의 진척도를 해당 날짜 기준으로 계산하여 100% 이상이면 배포 카운트를 추가하고, 그만큼 pop하여 다시 첫 번째 원소를 갱신  
+큐가 빌 때까지 이 작업을 반복하면 된다
+
+```python
+from collections import deque
+from math import ceil
+from typing import List
+
+
+def solution(progresses: List[int], speeds: List[int]) -> List[int]:
+    progresses = deque(progresses)
+    speeds = deque(speeds)
+    answer = []
+
+    while progresses:
+        days = ceil((100 - progresses[0]) / speeds[0])
+
+        num_of_deployments = 0
+        for progress, speed in zip(progresses, speeds):
+            if progress + days * speed >= 100:
+                num_of_deployments += 1
+            else:
+                break
+
+        for _ in range(num_of_deployments):
+            progresses.popleft()
+            speeds.popleft()
+
+        answer.append(num_of_deployments)
+
+    return answer
+
+
+assert solution([93, 30, 55], [1, 30, 5]) == [2, 1]
+assert solution([95, 90, 99, 99, 80, 99], [1, 1, 1, 1, 1, 1]) == [1, 3, 2]
+```
+
+#### [카드 뭉치](https://school.programmers.co.kr/learn/courses/30/lessons/159994)
+
+문제 조건에서 순서대로, 그리고 반드시 카드를 써야하며와 같은 문구로 큐를 써야한다는 것만 캐치하면 쉽게 구현 가능한 문제
+
+```python
+from collections import deque
+from typing import List
+
+
+def solution(cards1: List[str], cards2: List[str], goal: List[str]) -> str:
+    cards1 = deque(cards1)
+    cards2 = deque(cards2)
+    goal = deque(goal)
+
+    while goal:
+        current_word = goal[0]
+
+        if cards1 and current_word == cards1[0]:
+            cards1.popleft()
+            goal.popleft()
+        elif cards2 and current_word == cards2[0]:
+            cards2.popleft()
+            goal.popleft()
+        else:
+            return "No"
+
+    return "Yes"
+
+
+assert (
+    solution(
+        ["i", "drink", "water"], ["want", "to"], ["i", "want", "to", "drink", "water"]
+    )
+    == "Yes"
+)
+assert (
+    solution(
+        ["i", "water", "drink"], ["want", "to"], ["i", "want", "to", "drink", "water"]
+    )
+    == "No"
+)
+```
