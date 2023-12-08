@@ -219,6 +219,86 @@ assert (
 )
 ```
 
+#### [같은 숫자는 싫어](https://school.programmers.co.kr/learn/courses/30/lessons/12906)
+
+순서를 유지해야한다는 말 때문에 덱을 사용했는데, 그냥 arr을 for-loop 순회하면서 조건에 맞으면 append 하면 더 간단하게 풀이 가능
+
+```python
+from collections import deque
+from typing import List
+
+
+def solution(arr: List[int]) -> List[int]:
+    arr = deque(arr)
+    answer = []
+
+    while arr:
+        if not answer:
+            answer.append(arr.popleft())
+            continue
+
+        element = arr.popleft()
+        if element == answer[-1]:
+            continue
+        else:
+            answer.append(element)
+
+    return answer
+
+
+assert solution([1, 1, 3, 3, 0, 1, 1]) == [1, 3, 0, 1]
+assert solution([4, 4, 4, 3, 3]) == [4, 3]
+```
+
+#### [올바른 괄호](https://school.programmers.co.kr/learn/courses/30/lessons/12909)
+
+책의 초반 예제와 거의 동일한 문제, 아이디어 그대로 풀면 된다
+
+```python
+def solution(s: str) -> bool:
+    stack = []
+
+    for char in s:
+        if not stack:
+            stack.append(char)
+            continue
+
+        if char == ")" and stack[-1] == "(":
+            stack.pop()
+        else:
+            stack.append(char)
+
+    return False if stack else True
+```
+
+#### [컨트롤 제트](https://school.programmers.co.kr/learn/courses/30/lessons/120853)
+
+문제에서 Z가 들어오면 **바로 이전**이라는 힌트를 주므로 스택을 활용해서 풀면 된다  
+문제를 잘 읽으면 Z가 제일 처음 나오는 경우는 없으므로 stack이 비어있는 경우는 고려하지 않아도 됨  
+
+```python
+def solution(s: str) -> int:
+    tokens = s.split(" ")
+    stack = []
+
+    for token in tokens:
+        if token == "Z":
+            stack.pop()
+        else:
+            stack.append(int(token))
+
+    return sum(stack)
+```
+
+### 큐의 개념과 정의
+
+먼저 들어간 것이 먼저 나오는 FIFO (First In, First Out 또는 선입선출) 특징을 가지는 자료형   
+주요 연산은 스택과 마찬가지로 push와 pop이 있고, 그 외에 isFull, isEmpty, 그리고 최근에 삽입한 데이터의 위치인 top도 있음   
+문제 풀이 때는 발생한 순서대로 처리할 때, 들어오는 이벤트를 처리할 때 등일 때 큐를 떠올리면 좋다   
+파이썬에서는 큐를 직접 구현할 필요 없이 deque를 활용하면 됨  
+
+### 문제 풀이
+
 #### 요세푸스 문제
 
 제거할 원소 앞의 원소들을 큐의 뒤쪽에 다시 집어 넣고, 제거를 반복하는 아이디어를 생각하는 게 중요한 문제
