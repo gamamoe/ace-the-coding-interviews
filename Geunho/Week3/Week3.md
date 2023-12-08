@@ -219,6 +219,53 @@ assert (
 )
 ```
 
+#### [표 편집](https://school.programmers.co.kr/learn/courses/30/lessons/81303)
+
+문제 요구 조건대로 구현하여 우선 정확도는 다 통과하는 코드, 효율성은 모두 시간초과남
+
+```python
+from typing import List
+
+
+def solution(n: int, k: int, cmd: List[str]) -> str:
+    rows = [x for x in range(n)]
+    removed_rows = []
+    ptr = k
+    for command in cmd:
+        command = command.split(" ")
+
+        if command[0] == "U":
+            ptr -= int(command[1])
+        elif command[0] == "D":
+            ptr += int(command[1])
+        elif command[0] == "C":
+            removed_rows.append(rows[ptr])
+            if ptr == len(rows) - 1:
+                rows = rows[:ptr]
+                ptr -= 1
+            else:
+                rows = rows[:ptr] + rows[ptr + 1 :]
+        else:  # command[0] == "Z"
+            row_num = removed_rows.pop()
+            if rows[ptr] > row_num:
+                ptr += 1
+
+            rows = (
+                [x for x in rows if x < row_num]
+                + [row_num]
+                + [x for x in rows if x > row_num]
+            )
+
+    answer = []
+    rows = set(rows)
+    for i in range(n):
+        if i in rows:
+            answer.append("O")
+        else:
+            answer.append("X")
+    return "".join(answer)
+```
+
 #### [같은 숫자는 싫어](https://school.programmers.co.kr/learn/courses/30/lessons/12906)
 
 순서를 유지해야한다는 말 때문에 덱을 사용했는데, 그냥 arr을 for-loop 순회하면서 조건에 맞으면 append 하면 더 간단하게 풀이 가능
