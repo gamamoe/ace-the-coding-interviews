@@ -219,6 +219,133 @@ assert (
 )
 ```
 
+#### [표 편집](https://school.programmers.co.kr/learn/courses/30/lessons/81303)
+
+문제 요구 조건대로 구현하여 우선 정확도는 다 통과하는 코드, 효율성은 모두 시간초과남
+
+```python
+from typing import List
+
+
+def solution(n: int, k: int, cmd: List[str]) -> str:
+    rows = [x for x in range(n)]
+    removed_rows = []
+    ptr = k
+    for command in cmd:
+        command = command.split(" ")
+
+        if command[0] == "U":
+            ptr -= int(command[1])
+        elif command[0] == "D":
+            ptr += int(command[1])
+        elif command[0] == "C":
+            removed_rows.append(rows[ptr])
+            if ptr == len(rows) - 1:
+                rows = rows[:ptr]
+                ptr -= 1
+            else:
+                rows = rows[:ptr] + rows[ptr + 1 :]
+        else:  # command[0] == "Z"
+            row_num = removed_rows.pop()
+            if rows[ptr] > row_num:
+                ptr += 1
+
+            rows = (
+                [x for x in rows if x < row_num]
+                + [row_num]
+                + [x for x in rows if x > row_num]
+            )
+
+    answer = []
+    rows = set(rows)
+    for i in range(n):
+        if i in rows:
+            answer.append("O")
+        else:
+            answer.append("X")
+    return "".join(answer)
+```
+
+#### [같은 숫자는 싫어](https://school.programmers.co.kr/learn/courses/30/lessons/12906)
+
+순서를 유지해야한다는 말 때문에 덱을 사용했는데, 그냥 arr을 for-loop 순회하면서 조건에 맞으면 append 하면 더 간단하게 풀이 가능
+
+```python
+from collections import deque
+from typing import List
+
+
+def solution(arr: List[int]) -> List[int]:
+    arr = deque(arr)
+    answer = []
+
+    while arr:
+        if not answer:
+            answer.append(arr.popleft())
+            continue
+
+        element = arr.popleft()
+        if element == answer[-1]:
+            continue
+        else:
+            answer.append(element)
+
+    return answer
+
+
+assert solution([1, 1, 3, 3, 0, 1, 1]) == [1, 3, 0, 1]
+assert solution([4, 4, 4, 3, 3]) == [4, 3]
+```
+
+#### [올바른 괄호](https://school.programmers.co.kr/learn/courses/30/lessons/12909)
+
+책의 초반 예제와 거의 동일한 문제, 아이디어 그대로 풀면 된다
+
+```python
+def solution(s: str) -> bool:
+    stack = []
+
+    for char in s:
+        if not stack:
+            stack.append(char)
+            continue
+
+        if char == ")" and stack[-1] == "(":
+            stack.pop()
+        else:
+            stack.append(char)
+
+    return False if stack else True
+```
+
+#### [컨트롤 제트](https://school.programmers.co.kr/learn/courses/30/lessons/120853)
+
+문제에서 Z가 들어오면 **바로 이전**이라는 힌트를 주므로 스택을 활용해서 풀면 된다  
+문제를 잘 읽으면 Z가 제일 처음 나오는 경우는 없으므로 stack이 비어있는 경우는 고려하지 않아도 됨  
+
+```python
+def solution(s: str) -> int:
+    tokens = s.split(" ")
+    stack = []
+
+    for token in tokens:
+        if token == "Z":
+            stack.pop()
+        else:
+            stack.append(int(token))
+
+    return sum(stack)
+```
+
+### 큐의 개념과 정의
+
+먼저 들어간 것이 먼저 나오는 FIFO (First In, First Out 또는 선입선출) 특징을 가지는 자료형   
+주요 연산은 스택과 마찬가지로 push와 pop이 있고, 그 외에 isFull, isEmpty, 그리고 최근에 삽입한 데이터의 위치인 top도 있음   
+문제 풀이 때는 발생한 순서대로 처리할 때, 들어오는 이벤트를 처리할 때 등일 때 큐를 떠올리면 좋다   
+파이썬에서는 큐를 직접 구현할 필요 없이 deque를 활용하면 됨  
+
+### 문제 풀이
+
 #### 요세푸스 문제
 
 제거할 원소 앞의 원소들을 큐의 뒤쪽에 다시 집어 넣고, 제거를 반복하는 아이디어를 생각하는 게 중요한 문제
