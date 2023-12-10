@@ -99,3 +99,42 @@ assert (
     == "mislav"
 )
 ```
+
+#### [할인 행사](https://school.programmers.co.kr/learn/courses/30/lessons/131127)
+
+해시 객체를 만들고 날짜별로 슬라이딩하면서 만족하는 지 체크하는 코드  
+flag를 이용해서 체크하는 로직이 중복되어있어서 리팩토링이 필요함  
+교재의 풀이와 큰 틀에서는 차이가 없는데 이게 O(N)인지는 바로 와닿지는 않음 :(
+
+```python
+from collections import Counter
+from typing import List
+
+
+def solution(want: List[str], number: List[int], discount: List[str]) -> int:
+    want_num_dict = {}
+    for item, num in zip(want, number):
+        want_num_dict[item] = num
+
+    counter = Counter(discount[:10])
+    flag = True
+    for k, v in want_num_dict.items():
+        if counter[k] < v:
+            flag = False
+            break
+
+    answer =  1 if flag else 0
+    for i in range(len(discount) - 10):
+        counter[discount[i]] -= 1
+        counter[discount[i + 10]] += 1
+
+        flag = True
+        for k, v in want_num_dict.items():
+            if counter[k] < v:
+                flag = False
+                break
+
+        answer = answer + 1 if flag else answer
+
+    return answer
+```
