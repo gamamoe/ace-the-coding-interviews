@@ -14,9 +14,9 @@ def solution(want, number, discount):
     for i in range(len(discount) - 9): # 10개씩 이동하는 형태
         temp = defaultdict(int)  # 임시 기준 dict(반드시 여기서 초기화)
         for j in range(i, i + 10):
-            if discount[j] in dt: #자동+1 개수세기
-                temp[discount[j]] += 1
-        if dt == temp:
+#            if discount[j] in dt: 이 부분은 defaultdict으로 생략 可
+             temp[discount[j]] += 1 # 자동 +1 연산
+        if dt == temp: # 어차피 검증은 여기서 한다.
             answer += 1
     return answer
 
