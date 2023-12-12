@@ -138,3 +138,79 @@ def solution(want: List[str], number: List[int], discount: List[str]) -> int:
 
     return answer
 ```
+
+#### [오픈채팅방](https://school.programmers.co.kr/learn/courses/30/lessons/42888)
+
+문제 설명만 잘 이해하면 쉽게 풀이할 수 있는 문제. user_id는 유니크하고 최종적으로 매핑되는 닉네임만 입력값을 순회하면서 해시테이블에 잘 업데이트하면 된다
+
+```python
+from typing import List
+
+
+def _reformat_log_message(action: str, nickname: str) -> str:
+    if action == "Enter":
+        return f"{nickname}님이 들어왔습니다."
+    else:
+        return f"{nickname}님이 나갔습니다."
+
+
+def solution(record: List[str]) -> List[str]:
+    nickname_by_user_id = {}
+    logs_to_print = []
+    for row in record:
+        logs = row.split(" ")
+        action = logs[0]
+
+        if action == "Enter":
+            user_id, nickname = logs[1], logs[2]
+            nickname_by_user_id[user_id] = nickname
+            logs_to_print.append((action, user_id))
+        elif action == "Leave":
+            user_id = logs[1]
+            logs_to_print.append((action, user_id))
+        else:  # Change
+            user_id, nickname = logs[1], logs[2]
+            nickname_by_user_id[user_id] = nickname
+
+    answer = []
+    for action, user_id in logs_to_print:
+        log_message = _reformat_log_message(action, nickname_by_user_id[user_id])
+        answer.append(log_message)
+
+    return answer
+```
+
+#### [베스트앨범](https://school.programmers.co.kr/learn/courses/30/lessons/42579)
+
+각 장르별 총 재생 횟수에 대한 정보와 각 장르에 속한 음원을 요구조건에 맞춰서 정렬 후 상위 2개만 뽑아내는 작업을 구현하면 쉽게 풀 수 있는 문제
+
+```python
+from collections import defaultdict
+from typing import List
+
+
+def solution(genres: List[str], plays: List[int]) -> List[int]:
+    play_by_genre = defaultdict(int)
+    statistic_by_genre = defaultdict(list)
+
+    for index, (genre, play) in enumerate(zip(genres, plays)):
+        play_by_genre[genre] += play
+        statistic_by_genre[genre].append((play, index))
+
+    sorted_genres = sorted(
+        play_by_genre.keys(), key=lambda x: play_by_genre[x], reverse=True
+    )
+
+    answer = []
+    for genre in sorted_genres:
+        play_index_list = statistic_by_genre[genre]
+        sorted_play_index_list = sorted(play_index_list, key=lambda x: (-x[0], x[1]))
+        answer.extend([x[1] for x in sorted_play_index_list][:2])
+
+    return answer
+
+
+assert solution(
+    ["classic", "pop", "classic", "classic", "pop"], [500, 600, 150, 800, 2500]
+) == [4, 1, 3, 0]
+```
