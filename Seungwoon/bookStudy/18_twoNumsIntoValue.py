@@ -2,7 +2,7 @@
 def solution1(arr, target):
     for i in arr:
         value = target - i
-        if value != i and value >=0 and value <= target and value in arr:
+        if value != i and 0 <= value <= target and value in arr:
             return True
     return False
 
