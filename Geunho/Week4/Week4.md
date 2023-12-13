@@ -214,3 +214,91 @@ assert solution(
     ["classic", "pop", "classic", "classic", "pop"], [500, 600, 150, 800, 2500]
 ) == [4, 1, 3, 0]
 ```
+
+#### [신고 결과 받기](https://school.programmers.co.kr/learn/courses/30/lessons/92334)
+
+답안에 필요한 결과를 만들기 위해서 어떤 자료구조 (set, dict)를 사용할 지 잘 고려 하면 어렵지 않게 풀 수 있다  
+손으로 그려보는 게 중요한 것 같고, 조금 마음에 안드는 부분은 num_of_blocked_users를 구하는 부분인데 여기를 개선할 수 있으면 좋을 것 같음
+
+```python
+from collections import defaultdict
+from typing import List
+
+
+def solution(id_list: List[str], report: List[str], k: int) -> List[int]:
+    already_reported_logs = set()
+    report_count_by_user_id = defaultdict(int)
+    blocked_user_ids_by_user_id = defaultdict(list)
+    for log in report:
+        reporter, reported = log.split(" ")
+        if (reporter, reported) in already_reported_logs:
+            continue
+
+        already_reported_logs.add((reporter, reported))
+        report_count_by_user_id[reported] += 1
+        blocked_user_ids_by_user_id[reporter].append(reported)
+
+    answer = []
+    for user_id in id_list:
+        num_of_blocked_users = len(
+            [
+                x
+                for x in blocked_user_ids_by_user_id[user_id]
+                if report_count_by_user_id[x] >= k
+            ]
+        )
+        answer.append(num_of_blocked_users)
+
+    return answer
+```
+
+#### [메뉴 리뉴얼](https://school.programmers.co.kr/learn/courses/30/lessons/72411)
+
+Counter의 most_common을 사용하면 중간 부분의 max_num 가지고 처리하는 부분을 깔끔하게 해결할 수 있음
+
+```python
+from collections import defaultdict
+from itertools import combinations
+from typing import List
+
+
+def solution(orders: List[str], course: List[int]) -> List[str]:
+    answer = []
+
+    for r in course:
+        count_by_course_combinations = defaultdict(int)
+        for order in orders:
+            for combination in combinations(order, r):
+                count_by_course_combinations["".join(sorted(combination))] += 1
+
+        combination_count = count_by_course_combinations.values()
+        if not combination_count or max(combination_count) < 2:
+            continue
+
+        max_num_of_combinations = max(combination_count)
+        answer.extend(
+            [
+                x
+                for x in count_by_course_combinations.keys()
+                if count_by_course_combinations[x] == max_num_of_combinations
+            ]
+        )
+
+    return sorted(answer)
+
+
+assert solution(["ABCFG", "AC", "CDE", "ACDE", "BCFG", "ACDEH"], [2, 3, 4]) == [
+    "AC",
+    "ACDE",
+    "BCFG",
+    "CDE",
+]
+assert solution(["ABCDE", "AB", "CD", "ADE", "XYZ", "XYZ", "ACD"], [2, 3, 5]) == [
+    "ACD",
+    "AD",
+    "ADE",
+    "CD",
+    "XYZ",
+]
+assert solution(["XYZ", "XWY", "WXA"], [2, 3, 4]) == ["WX", "XY"]
+```

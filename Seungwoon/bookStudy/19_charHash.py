@@ -19,7 +19,6 @@ def solution(string_list, query_list):
         query_hash = polynomial_hash(query)
          # 대응되면 True, 아니면 False
         result.append(query_hash in hash_list)
-
     return result
 
 
