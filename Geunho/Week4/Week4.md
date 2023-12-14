@@ -394,3 +394,43 @@ def solution(msg: str) -> List[int]:
 
     return answer
 ```
+
+#### [폰켓몬](https://school.programmers.co.kr/learn/courses/30/lessons/1845)
+
+프로그래머스 해쉬 추가 문제. 문제 지문과 예시만 잘 읽어보면 어처구니 없을 정도로 쉽게 풀이 가능한 문제  
+굳이 조합이니 뭐니 찾을 필요가 없음
+
+```python
+from typing import List
+
+
+def solution(nums: List[int]) -> int:
+    possible_num_of_choices = len(nums) // 2
+    return min(len(set(nums)), possible_num_of_choices)
+```
+
+#### [전화번호 목록](https://school.programmers.co.kr/learn/courses/30/lessons/42577)
+
+해쉬 카테고리에 있지만 정렬로 우선 풀이. 풀고 나니 Trie를 써야하는 문제인 것 같기도 함  
+다른 풀이로도 한 번 풀어볼 것
+
+```python
+from typing import List
+
+
+def solution(phone_book: List[str]) -> bool:
+    sorted_phone_book = sorted(phone_book)
+    index = 0
+
+    while index < len(phone_book) - 1:
+        if sorted_phone_book[index + 1].startswith(sorted_phone_book[index]):
+            return False
+        index += 1
+
+    return True
+
+
+assert not solution(["119", "97674223", "1195524421"])
+assert solution(["123", "456", "789"])
+assert not solution(["12", "123", "1235", "567", "88"])
+```
