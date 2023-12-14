@@ -302,3 +302,135 @@ assert solution(["ABCDE", "AB", "CD", "ADE", "XYZ", "XYZ", "ACD"], [2, 3, 5]) ==
 ]
 assert solution(["XYZ", "XWY", "WXA"], [2, 3, 4]) == ["WX", "XY"]
 ```
+
+#### [의상](https://school.programmers.co.kr/learn/courses/30/lessons/42578)
+
+첫 번째 테스트케이스에서 시간 초과 나는 코드, 조금 더 고민해보고 안되면 힌트를 봐야할 것 같음  
+현재 구현은 단순히 요구하는 대로 조합을 계산하면서 캐싱된 값이 있으면 그걸 최대한 활용하게 구현함
+
+```python
+from collections import defaultdict
+from itertools import combinations
+from typing import List
+
+
+def solution(clothes: List[List[str]]) -> int:
+    count_by_clothes_type = defaultdict(int)
+    for row in clothes:
+        _, clothes_type = row
+        count_by_clothes_type[clothes_type] += 1
+
+    answer = sum(count_by_clothes_type.values())
+    cache = {(k,): v for k, v in count_by_clothes_type.items()}
+    clothes_type = count_by_clothes_type.keys()
+    for i in range(2, len(clothes_type) + 1):
+        for combination in combinations(clothes_type, i):
+            cache_result = cache.get(combination[:-1])
+            num_of_combinations = cache_result * count_by_clothes_type[combination[-1]]
+
+            answer += num_of_combinations
+            cache[combination] = num_of_combinations
+
+    return answer
+
+
+assert (
+    solution(
+        [
+            ["yellow_hat", "headgear"],
+            ["blue_sunglasses", "eyewear"],
+            ["green_turban", "headgear"],
+        ]
+    )
+    == 5
+)
+assert (
+    solution(
+        [["crow_mask", "face"], ["blue_sunglasses", "face"], ["smoky_makeup", "face"]]
+    )
+    == 3
+)
+```
+
+#### [압축](https://school.programmers.co.kr/learn/courses/30/lessons/17684)
+
+한 글자만 남았을 때와, next_word가 마지막 케이스일 때 예외처리 때문에 좀 지저분하게 작성함  
+다른 사람 풀이를 보면 좀더 neat하게 작성할 수 있음, 아이디어 자체는 딕셔너리 활용 문제에 가까움
+
+```python
+from typing import List
+
+
+def solution(msg: str) -> List[int]:
+    answer = []
+    compression_dict = {
+        str(char): ord(char) - 64 for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    }
+    current_index, last_index = 0, 26
+
+    while current_index < len(msg):
+        current_word = msg[current_index]
+        if current_index == len(msg) - 1:
+            answer.append(compression_dict[current_word])
+            break
+
+        for i in range(current_index + 1, len(msg)):
+            next_word = f"{current_word}{msg[i]}"
+
+            if next_word in compression_dict:
+                if current_index + len(next_word) == len(msg):
+                    answer.append(compression_dict[next_word])
+                    current_index += len(next_word)
+                    break
+                else:
+                    current_word = next_word
+                    continue
+            else:
+                answer.append(compression_dict[current_word])
+                compression_dict[next_word] = last_index + 1
+                last_index += 1
+                current_index += len(current_word)
+                break
+
+    return answer
+```
+
+#### [폰켓몬](https://school.programmers.co.kr/learn/courses/30/lessons/1845)
+
+프로그래머스 해쉬 추가 문제. 문제 지문과 예시만 잘 읽어보면 어처구니 없을 정도로 쉽게 풀이 가능한 문제  
+굳이 조합이니 뭐니 찾을 필요가 없음
+
+```python
+from typing import List
+
+
+def solution(nums: List[int]) -> int:
+    possible_num_of_choices = len(nums) // 2
+    return min(len(set(nums)), possible_num_of_choices)
+```
+
+#### [전화번호 목록](https://school.programmers.co.kr/learn/courses/30/lessons/42577)
+
+해쉬 카테고리에 있지만 정렬로 우선 풀이. 풀고 나니 Trie를 써야하는 문제인 것 같기도 함  
+다른 풀이로도 한 번 풀어볼 것
+
+```python
+from typing import List
+
+
+def solution(phone_book: List[str]) -> bool:
+    sorted_phone_book = sorted(phone_book)
+    index = 0
+
+    while index < len(phone_book) - 1:
+        if sorted_phone_book[index + 1].startswith(sorted_phone_book[index]):
+            return False
+        index += 1
+
+    return True
+
+
+assert not solution(["119", "97674223", "1195524421"])
+assert solution(["123", "456", "789"])
+assert not solution(["12", "123", "1235", "567", "88"])
+```
