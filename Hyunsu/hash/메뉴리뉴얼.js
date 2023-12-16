@@ -2,7 +2,7 @@ const assert = require("assert");
 const { setEngine } = require("crypto");
 
 /**
- * 예제 케이스만 맞고, 실패
+ *
  * 1.각 손님에 대한 주문에서, 단품메뉴 조합 구하기
  *   - 1번손님 : 2개조합, 3개조합, 4개조합
  *   - 2번손님 : 2개조합, 3개조합, 4개조합
@@ -108,10 +108,9 @@ function solution1(orders, course) {
     for (let o of orders) {
       o = o.split("").sort().join("");
       dfs(o, c, 0);
-      // 구성이 몇 번 주문되었는지
-      finalMenuFreqMapper;
     }
   }
+  // 모든 조합 {메뉴 : 출현 횟수} 와 max출현횟수를 비교하여 메뉴이름만 배열로 필터
   let answer = Object.keys(finalMenuFreqMapper).filter(
     (menu) => maxFreq[menu.length] === finalMenuFreqMapper[menu]
   );
