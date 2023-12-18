@@ -1,3 +1,4 @@
+const assert = require("assert");
 /**
  * 접근법:
  * 10일치의 아이템과 개수를 저장하는 map 생성(=currentDiscount)
@@ -19,12 +20,17 @@
 function solution(want, number, discount) {
   var answer = 0;
   const currentDiscount = new Map();
+
+  //generate wantTable
+  const wantTable = new Map();
+  want.forEach((item, i) => wantTable.set(item, number[i]));
+  // discount
   for (let i = 0; i < discount.length; i++) {
     const item = discount[i];
     if (i < 10) {
       currentDiscount.set(item, (currentDiscount.get(item) || 0) + 1);
       if (i === 9) {
-        if (hasAllWantItem(want, currentDiscount, number)) {
+        if (hasAllWantItem(wantTable, currentDiscount)) {
           answer += 1;
         }
       }
@@ -37,8 +43,12 @@ function solution(want, number, discount) {
     let left = i - 10;
     const leftItem = discount[left];
     currentDiscount.set(leftItem, currentDiscount.get(leftItem) - 1); //음수고려
+    // 만약 0이면 지워주기
+    if (currentDiscount.get(leftItem) === 0) {
+      currentDiscount.delete(leftItem);
+    }
 
-    if (hasAllWantItem(want, currentDiscount, number)) {
+    if (hasAllWantItem(wantTable, currentDiscount)) {
       answer += 1;
     }
   }
@@ -46,18 +56,54 @@ function solution(want, number, discount) {
   return answer;
 }
 
-function hasAllWantItem(want, currentDiscount, number) {
-  let count = 0;
-  for (let i = 0; i < want.length; i++) {
-    //수량과, 아이템이 일치하는지
-    if (
-      currentDiscount.get(want[i]) &&
-      currentDiscount.get(want[i]) === number[i]
-    ) {
-      //일치하면 +1
-      count += 1;
-    }
-  }
-
-  return count === want.length;
+function hasAllWantItem(wantTable, currentDiscount) {
+  return (
+    wantTable.size === currentDiscount.size &&
+    Array.from(wantTable.keys()).every((key) => {
+      return wantTable.get(key) === currentDiscount.get(key);
+    })
+  );
 }
+// assert.deepEqual(
+//   solution(
+//     ["banana", "apple", "rice", "pork", "pot"],
+//     [3, 2, 2, 2, 1],
+//     [
+//       "chicken",
+//       "apple",
+//       "apple",
+//       "banana",
+//       "rice",
+//       "apple",
+//       "pork",
+//       "banana",
+//       "pork",
+//       "rice",
+//       "pot",
+//       "banana",
+//       "apple",
+//       "banana",
+//     ]
+//   ),
+//   3
+// );
+
+assert.deepEqual(
+  solution(
+    ["apple"],
+    [10],
+    [
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+      "banana",
+    ]
+  ),
+  0
+);
