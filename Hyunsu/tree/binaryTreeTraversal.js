@@ -8,6 +8,16 @@ function solution(nums) {
   ];
 }
 
+/**
+ *
+ * 0부터 시작하는 경우  인덱스 설정시 기존 설정에서 +1로 세팅
+ * preorder: 부모가 pre가 된다.
+ *
+ * @param {*} root
+ * @param {*} nums
+ * @param {*} result
+ * @returns
+ */
 function preorder(root, nums, result) {
   if (!nums[root]) return;
   result.push(nums[root]);
@@ -16,6 +26,13 @@ function preorder(root, nums, result) {
   return result;
 }
 
+/**
+ * inorder :부모가 중간이 된다. 왼쪽에서 리턴되어 나온 다음의 순서.
+ * @param {*} root
+ * @param {*} nums
+ * @param {*} result
+ * @returns
+ */
 function inorder(root, nums, result) {
   if (!nums[root]) return;
   inorder(root * 2 + 1, nums, result);
@@ -24,6 +41,13 @@ function inorder(root, nums, result) {
   return result;
 }
 
+/**
+ * postorder: 부모가 마지막이 된다. 오른쪽에서 리턴되어 나온 다음의 순서.
+ * @param {*} root
+ * @param {*} nums
+ * @param {*} result
+ * @returns
+ */
 function postorder(root, nums, result) {
   if (!nums[root]) return;
   postorder(root * 2 + 1, nums, result);

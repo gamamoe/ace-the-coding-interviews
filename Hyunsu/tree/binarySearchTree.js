@@ -12,10 +12,19 @@ class Node {
   }
 }
 
+/**
+ * Represents a Binary Search Tree.
+ * insert 시 traverse 하여 적절한 자리를 찾아야 함. (이미 노드가 존재 한다면 다음 노드로 traverse 해야한다)
+ * 적절한 노드의 기준은 parent노드의 값보다 작으면 parent.left, 그 외의 경우 parent.right로 지정
+ *
+ *
+ * @class
+ */
 class BST {
   constructor(root) {
     this.root = root || null;
   }
+
   insert(value) {
     if (!value) throw "no value";
     let current, parent;
@@ -55,7 +64,6 @@ class BST {
 }
 function solution(lst, search_list) {
   const bst = new BST();
-  console.log("bst", bst);
   lst.forEach((v) => bst.insert(v));
   return search_list.map((v) => bst.find(v));
 }
