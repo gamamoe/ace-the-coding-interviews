@@ -4,14 +4,7 @@
  *
  */
 const assert = require("assert");
-class Node {
-  constructor(val, left, right) {
-    this.val = val || 0;
-    this.left = left || null;
-    this.right = right | null;
-  }
-}
-
+const { BST } = require("../utils/bst");
 /**
  * Represents a Binary Search Tree.
  * insert 시 traverse 하여 적절한 자리를 찾아야 함. (이미 노드가 존재 한다면 다음 노드로 traverse 해야한다)
@@ -20,52 +13,11 @@ class Node {
  *
  * @class
  */
-class BST {
-  constructor(root) {
-    this.root = root || null;
-  }
 
-  insert(value) {
-    if (!value) throw "no value";
-    let current, parent;
-    if (!this.root) {
-      this.root = new Node(value);
-      return;
-    }
-    current = this.root;
-    //current가 없을 때까지 traverse한다.
-    while (current) {
-      parent = current; //마지막 노드 지점 저장
-      if (value < current.val) {
-        current = current.left;
-      } else {
-        current = current.right;
-      }
-    }
-    //current가 없는 지점에, node를 생성
-    if (value < parent.val) {
-      parent.left = new Node(value);
-    } else {
-      parent.right = new Node(value);
-    }
-  }
-
-  find(value) {
-    if (!value) throw "no value";
-    if (!this.root) throw "no root node";
-    //value 비교
-    let current = this.root;
-    while (current) {
-      if (current.val === value) return true;
-      current = value < current.val ? current.left : current.right;
-    }
-    return false;
-  }
-}
 function solution(lst, search_list) {
   const bst = new BST();
-  lst.forEach((v) => bst.insert(v));
-  return search_list.map((v) => bst.find(v));
+  lst.forEach((v) => bst.insert);
+  return search_list.map((v) => bst.find);
 }
 
 assert.deepEqual(solution([5, 3, 8, 4, 2, 1, 7, 10], [1, 2, 5, 6]), [
