@@ -209,3 +209,98 @@ assert solution(
     [2, 3, 5, 4],
 ) == [0, 110, 378, 180, 270, 450, 0, 0]
 ```
+
+#### [미로 탈출](https://school.programmers.co.kr/learn/courses/30/lessons/159993)
+
+최소 경로 (시간)을 요구하고 간선 웨이트가 없는 그래프이므로 BFS로 접근을 해야한다  
+트리는 그래프의 일종으로 볼 수 있기 때문에 주로 그래프에서 많이 보는 BFS 알고리즘을 활용한 문제는 좋으나 문제 배치가 조금 아쉬운 부분이 있음  
+BFS의 의사 코드는 아래와 같다 ( https://en.wikipedia.org/wiki/Breadth-first_search#Pseudocode )
+
+```
+#  1  procedure BFS(G, root) is
+#  2      let Q be a queue
+#  3      label root as explored
+#  4      Q.enqueue(root)
+#  5      while Q is not empty do
+#  6          v := Q.dequeue()
+#  7          if v is the goal then
+#  8              return v
+#  9          for all edges from v to w in G.adjacentEdges(v) do
+# 10              if w is not labeled as explored then
+# 11                  label w as explored
+# 12                  w.parent := v
+# 13                  Q.enqueue(w)
+```
+
+레버를 반드시 당기고 탈출해야 하므로, BFS를 두 번 (Start -> Lever) 그리고 (Lever -> End)하는 방식으로 접근하였음  
+위의 의사 코드를 구현하되, 경로 길이를 저장할 변수를 하나 고려해서 BFS마다 갱신하도록 한다  
+책의 풀이는 visited를 확장하여 L을 마크한 시점에 다른 인덱스를 쓰는 방식으로 구현되어 있어서 BFS를 한 번만 해도 되는 풀이  
+가독성은 BFS를 그냥 두 번 하는 것이 더 나은 것 같다
+
+```python
+from collections import deque
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class Coordinate:
+    x: int
+    y: int
+    path_length: int
+
+
+def bfs(maps: List[str], start_coordinate: Coordinate, end_marker: str) -> int:
+    m, n = len(maps), len(maps[0])
+    visited = [[False] * n for _ in range(m)]
+    visited[start_coordinate.y][start_coordinate.x] = True
+    queue = deque([start_coordinate])
+
+    while queue:
+        coordinate = queue.popleft()
+        x, y, path_length = coordinate.x, coordinate.y, coordinate.path_length
+
+        if maps[y][x] == end_marker:
+            return path_length
+
+        for dy, dx in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            new_y, new_x = y + dy, x + dx
+
+            if not (0 <= new_y < m) or not (0 <= new_x < n):
+                continue
+
+            if maps[new_y][new_x] == "X":
+                continue
+
+            if not visited[new_y][new_x]:
+                visited[new_y][new_x] = True
+                queue.append(Coordinate(x=new_x, y=new_y, path_length=path_length + 1))
+
+    return -1
+
+
+def solution(maps: List[str]) -> int:
+    m, n = len(maps), len(maps[0])
+
+    start_coordinate, lever_coordinate = None, None
+    for y in range(m):
+        for x in range(n):
+            if maps[y][x] == "S":
+                start_coordinate = Coordinate(x, y, 0)
+            elif maps[y][x] == "L":
+                lever_coordinate = Coordinate(x, y, 0)
+            else:
+                continue
+
+    start_to_lever = bfs(maps, start_coordinate, "L")
+    lever_to_end = bfs(maps, lever_coordinate, "E")
+
+    if start_to_lever == -1 or lever_to_end == -1:
+        return -1
+
+    return start_to_lever + lever_to_end
+
+
+assert solution(["SOOOL", "XXXXO", "OOOOO", "OXXXX", "OOOOE"]) == 16
+assert solution(["LOOXS", "OOOOX", "OOOOO", "OOOOO", "EOOOO"]) == -1
+```
