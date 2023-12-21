@@ -304,3 +304,129 @@ def solution(maps: List[str]) -> int:
 assert solution(["SOOOL", "XXXXO", "OOOOO", "OXXXX", "OOOOE"]) == 16
 assert solution(["LOOXS", "OOOOX", "OOOOO", "OOOOO", "EOOOO"]) == -1
 ```
+
+#### [길 찾기 게임](https://school.programmers.co.kr/learn/courses/30/lessons/42892)
+
+앞에서 이론으로 배웠던 내용들을 조합해서 풀이하는 문제  
+
+1. 우선 주어진 입력값으로 이진검색트리를 생성
+2. 이진검색트리의 preorder와 postorder 구현
+
+트리나 그래프 문제는 템플릿이 주어지지 않는다고 가정하고, 그냥 바로바로 구현할 수 있을 정도로 숙달되어야한다고 본다
+
+```python
+from typing import List, Tuple
+
+
+class TreeNode:
+    def __init__(self, index, value, left=None, right=None):
+        self.index = index
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class BST:
+    def __init__(self, node: TreeNode = None):
+        self.root = node
+
+    def insert(self, node_info: Tuple[int, List[int]]):
+        node_index = node_info[0]
+        node_value = node_info[1][0]
+
+        if not self.root:
+            self.root = TreeNode(node_index, node_value)
+            return
+
+        current = self.root
+        while current:
+            if node_value < current.value:
+                if current.left:
+                    current = current.left
+                    continue
+                else:
+                    current.left = TreeNode(node_index, node_value)
+                    break
+            else:
+                if current.right:
+                    current = current.right
+                    continue
+                else:
+                    current.right = TreeNode(node_index, node_value)
+                    break
+
+    def get_pre_order(self) -> List[int]:
+        stack = [self.root]
+        path = []
+        while stack:
+            node = stack.pop()
+            if node:
+                path.append(node.index)
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+
+        return path
+
+    def get_post_order(self) -> List[int]:
+        stack = [self.root]
+        path = []
+        visited = set()
+        while stack:
+            node = stack.pop()
+            if node and node.index in visited:
+                path.append(node.index)
+
+            if node and node.index not in visited:
+                stack.append(node)
+            if node.right and node.right.index not in visited:
+                stack.append(node.right)
+            if node.left and node.left.index not in visited:
+                stack.append(node.left)
+
+            visited.add(node.index)
+
+        return path
+
+
+def solution(nodeinfo: List[List[int]]) -> List[List[int]]:
+    node_index = [x + 1 for x in range(len(nodeinfo))]
+    index_with_node_info = zip(node_index, nodeinfo)
+    sorted_node_info = sorted(index_with_node_info, key=lambda p: p[1][1], reverse=True)
+
+    tree = BST()
+    for x in sorted_node_info:
+        tree.insert(x)
+
+    return [tree.get_pre_order(), tree.get_post_order()]
+
+
+assert solution(
+    [[5, 3], [11, 5], [13, 3], [3, 5], [6, 1], [1, 3], [8, 6], [7, 2], [2, 2]]
+) == [[7, 4, 6, 9, 1, 8, 5, 2, 3], [9, 6, 5, 8, 1, 4, 3, 2, 7]]
+```
+
+preorder와 postorder 구현은 좀 더 neat한 코드들이 많았는 데 아래와 같다  
+아주 직관적인 방식이라고 생각함. 그러나 스택을 이용한 iterative한 방식도 기억은 해두자
+
+```python
+def preorder(node):
+    """
+    1. 비어 있을 경우 [] return
+    2. 자기자신을 먼저 방문후 left, right 순으로 방문 [root[0]] + preorder(left) + preorder(right)
+    """
+    if node is None:
+        return []
+    return [node.root[0]] + preorder(node.left) + preorder(node.right)
+
+
+def postorder(data):
+    """
+    1. 비어 있을 경우 [] return
+    2. left를 먼저 방문, right 방문 그 후 자기자신 방문 순으로 반환 postorder(left) + postorder(right) + [root[0]]
+    """
+    if data is None:
+        return []
+    return postorder(data.left) + postorder(data.right) + [data.root[0]]
+```
