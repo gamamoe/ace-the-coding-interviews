@@ -478,3 +478,162 @@ def postorder(data):
         return []
     return postorder(data.left) + postorder(data.right) + [data.root[0]]
 ```
+
+#### [양과 늑대](https://school.programmers.co.kr/learn/courses/30/lessons/92343)
+
+이 문제는 접근 자체는 BFS를 통해서 하고 다음 노드가 늑대일 때는 특정 조건 체크까지는 구현했는데  
+정답을 구할 수 있는 최종코드까지는 직접 구현하지 못했다  
+내가 구현한 부분은 아래 코드와 같음
+
+```python
+from collections import deque
+from typing import List
+
+
+class TreeNode:
+    def __init__(self, index, value, left=None, right=None):
+        self.index = index
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+class BST:
+    def __init__(self, node_info: List[int], node: TreeNode):
+        self.node_info = node_info
+        self.root = node
+
+    def insert(self, parent_index: int, target_index: int):
+        stack = [self.root]
+
+        while stack:
+            node = stack.pop()
+
+            if node.index == parent_index:
+                if node.left:
+                    node.right = TreeNode(target_index, self.node_info[target_index])
+                else:
+                    node.left = TreeNode(target_index, self.node_info[target_index])
+                break
+            else:
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
+
+    def get_maximum_sheep(self):
+        visited = {self.root.index}
+        queue = deque([(self.root, 1, 0)])
+
+        num_sheep = 1
+        while queue:
+            node, num_sheep, num_wolf = queue.popleft()
+
+            if node.left and node.left.value == 0 and node.left.index not in visited:
+                visited.add(node.left.index)
+                queue.append((node.left, num_sheep + 1, num_wolf))
+            elif node.left and node.left.value == 1 and node.left.index not in visited:
+                if num_sheep - num_wolf > 1:
+                    visited.add(node.left.index)
+                    queue.append((node.left, num_sheep, num_wolf + 1))
+
+            if node.right and node.right.value == 0 and node.right.index not in visited:
+                visited.add(node.right.index)
+                queue.append((node.right, num_sheep + 1, num_wolf))
+            elif node.right and node.right.value == 1 and node.right.index not in visited:
+                visited.add(node.right.index)
+                queue.append((node.right, num_sheep, num_wolf + 1))
+
+        return num_sheep
+
+
+def solution(info: List[int], edges: List[List[int]]) -> int:
+    tree = BST(node_info=info, node=TreeNode(0, 0))
+
+    for parent_index, child_index in sorted(edges):
+        tree.insert(parent_index, child_index)
+
+    return tree.get_maximum_sheep()
+```
+
+저자 풀이는 트리 구조도 좀 더 간단하게, 그리고 아이디어는 큐에 넣을 때 정보 처리하는 부분이었다  
+가능한 모든 케이스를 다 봐야하므로 visited를 관리하는 부분이 핵심이었음  
+```python
+from collections import deque, defaultdict
+from typing import List
+
+
+def solution(info: List[int], edges: List[List[int]]) -> int:
+    tree = defaultdict(list)
+    for parent_index, child_index in edges:
+        tree[parent_index].append(child_index)
+
+    max_sheep = 0
+    queue = deque([(0, 1, 0, set())])
+    while queue:
+        node_index, num_sheep, num_wolf, visited = queue.popleft()
+        max_sheep = max(max_sheep, num_sheep)
+        visited.update(tree[node_index])
+
+        for next_node_index in visited:
+            if info[next_node_index]:
+                if num_sheep - num_wolf > 1:
+                    queue.append(
+                        (
+                            next_node_index,
+                            num_sheep,
+                            num_wolf + 1,
+                            visited - {next_node_index},
+                        )
+                    )
+            else:
+                queue.append(
+                    (
+                        next_node_index,
+                        num_sheep + 1,
+                        num_wolf,
+                        visited - {next_node_index},
+                    )
+                )
+
+    return max_sheep
+
+
+assert (
+    solution(
+        [0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1],
+        [
+            [0, 1],
+            [1, 2],
+            [1, 4],
+            [0, 8],
+            [8, 7],
+            [9, 10],
+            [9, 11],
+            [4, 3],
+            [6, 5],
+            [4, 6],
+            [8, 9],
+        ],
+    )
+    == 5
+)
+assert (
+    solution(
+        [0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0],
+        [
+            [0, 1],
+            [0, 2],
+            [1, 3],
+            [1, 4],
+            [2, 5],
+            [2, 6],
+            [3, 7],
+            [4, 8],
+            [6, 9],
+            [9, 10],
+        ],
+    )
+    == 5
+)
+```
