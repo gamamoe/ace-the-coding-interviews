@@ -154,3 +154,97 @@ def solution(phone_book: List[str]) -> bool:
 
     return True
 ```
+
+#### [섬 연결하기](https://school.programmers.co.kr/learn/courses/30/lessons/42861)
+
+모든 permutation을 계산하고 path의 합 중 최솟값을 찾는 나이브한 방법 -> 시간 초과 발생
+
+```python
+from itertools import permutations
+from typing import List
+
+
+def solution(n: int, costs: List[List[int]]) -> int:
+    cost_by_path = {}
+    for cost in costs:
+        node1, node2, val = cost
+        path = (node1, node2) if node1 < node2 else (node2, node1)
+        cost_by_path[path] = val
+
+    answer = sum(cost_by_path.values())
+    for permutation in permutations(range(n)):
+        path_cost = 0
+        is_valid = True
+        for i in range(len(permutation) - 1):
+            node1 = permutation[i]
+            node2 = permutation[i + 1]
+            path = (node1, node2) if node1 < node2 else (node2, node1)
+
+            if cost := cost_by_path.get(path):
+                path_cost += cost
+            else:
+                is_valid = False
+                break
+
+        answer = min(answer, path_cost) if is_valid else answer
+
+    return answer
+
+
+assert solution(4, [[0, 1, 1], [0, 2, 2], [1, 2, 5], [1, 3, 1], [2, 3, 8]]) == 4
+```
+
+저자 풀이를 보고 조금 변형한 풀이  
+우선 핵심은, 비용을 최소화 하는 것이기 때문에 사이클이 생기면 안된다 (왜냐면 최소 1 이상의 cost이므로 사이클이 생기면 무조건 최소보단 커짐)  
+사이클의 판별은 두 개 노드의 root 노드가 같은지로 판단할 수 있다 (find 호출)  
+코드 풀이에서 트리 압축과 rank를 활용한 부분도 있으니 이것도 챙겨갈 것  
+이 문제는 그리고 사실 MST (최소 신장 트리)의 구현 문제와 같다
+```python
+from typing import List
+
+
+def solution(n: int, costs: List[List[int]]) -> int:
+    def find(node: int) -> int:
+        if node == disjoint_set[node]:
+            return node
+
+        disjoint_set[node] = find(disjoint_set[node])
+        return disjoint_set[node]
+
+    def union(n1: int, n2: int) -> None:
+        # find 과정을 통해 경로 압축이 이뤄짐
+        root1 = find(n1)
+        root2 = find(n2)
+
+        if rank[root1] < rank[root2]:
+            disjoint_set[root1] = root2
+        elif rank[root1] > rank[root2]:
+            disjoint_set[root2] = root1
+        else:
+            disjoint_set[root2] = root1
+            rank[root1] += 1
+
+    sorted_costs = sorted(costs, key=lambda c: c[2])
+    disjoint_set = [x for x in range(n)]
+    rank = [0] * n
+    min_cost = 0
+    num_of_edges = 0
+
+    for cost_info in sorted_costs:
+        if num_of_edges == n - 1:
+            break
+
+        node1, node2, cost = cost_info
+        root_of_node1 = find(node1)
+        root_of_node2 = find(node2)
+
+        if root_of_node1 != root_of_node2:
+            union(node1, node2)
+            min_cost += cost
+            num_of_edges += 1
+
+    return min_cost
+
+
+assert solution(4, [[0, 1, 1], [0, 2, 2], [1, 2, 5], [1, 3, 1], [2, 3, 8]]) == 4
+```
