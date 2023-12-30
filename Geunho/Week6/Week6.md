@@ -1,4 +1,63 @@
-### 상호배타적 집합
+### 집합과 상호배타적 집합의 개념
+
+집합은 순서와 중복이 없는 원소들을 갖는 자료구조, Python에서는 간단하게 `set()`을 활용할 수 있다. 
+상호배타적 집합은 서로 다른 두 집합 사이에 공통 원소가 없는 경우를 말함
+
+코딩 테스트에서 상호배타적 집합을 활용하는 가장 큰 이유는 그래프 알고리즘 중 **사이클**을 판별하기 위해서 활용.
+그 외에는 아래와 같은 응용 사례들이 존재한다
+
+- 이미지 분할
+- 도로 네트워크 구성
+- 최소 신장 트리 알고리즘 구현
+- 게임 개발
+- 클러스터링 작업
+
+### 집합의 연산
+
+집합의 표현은 앞서 배운 트리의 배열 표현과 거의 유사하게 구현할 수 있고, 대표적인 연산은 합치기와 탐색 (Union-Find)가 있음. 
+배열의 인덱스는 자기 자신, 그리고 그 인덱스에 해당 하는 값은 부모 노드를 의미하고 만약 인덱스와 인덱스에 해당하는 부모 노드 값이 같다면 
+그것은 루트 노드를 의미한다. 보통 초기화 시 부모 노드는 자기 자신으로 설정하고 알고리즘이 진행되면서 채워지게 됨
+
+```python
+# 인덱스와 인덱스에 해당하는 값이 같은 값을 가지도록 초기화
+num_of_nodes = 5
+disjoint_set = [x for x in range(num_of_nodes)]
+```
+
+### 유니온-파인드 알고리즘
+
+파인드 연산은 특정 노드의 루트 노드가 무엇인지 탐색하는 방법이고, 만약 두 노드의 파인드 연산 결과가 같다면 동일한 루트 노드를 가진다는 의미로 볼 수 있다. 
+즉, 반대로 생각하면 사이클이 형성되는 지 여부도 파인드 연산의 결과 비교를 통해서 가능함
+
+```python
+disjoint_set = [x for x in range(num_of_nodes)]
+def find(node: int) -> int:
+    if disjoint_set[node] != node:
+        # 아래 호출을 통해서 경로 압축이 발생
+        disjoint_set[node] = find(disjoint_set[node])
+    return disjoint_set[node]
+```
+
+합치기 연산은 두 집합을 하나로 합치는 연산이고, 다시 말하면 두 집합의 루트 노드를 같게 하는 것. 
+루트 노드는 두 집합의 루트 노드 중 하나가 되면 되지만, 보통 rank 개념을 도입해서 처리를 한다. 
+아이디어는 rank가 낮은 집합의 루트 노드의 부모 노드를 rank가 큰 집합의 루트 노드로 변경. 
+만약 rank가 같다면 둘 중 하나를 root 노드로 갱신하고 rank 값도 1 증가
+
+```python
+disjoint_set = [x for x in range(num_of_nodes)]
+rank = [0] * num_of_nodes
+def union(node1: int, node2: int) -> None:
+    root_of_node1 = find(node1)
+    root_of_node2 = find(node2)
+
+    if rank[root_of_node1] < rank[root_of_node2]:
+        disjoint_set[root_of_node1] = root_of_node2
+    elif rank[root_of_node1] > rank[root_of_node2]:
+        disjoint_set[root_of_node2] = root_of_node1
+    else:
+        disjoint_set[root_of_node2] = root_of_node1
+        rank[root_of_node1] += 1
+```
 
 ### 몸풀기 문제
 
