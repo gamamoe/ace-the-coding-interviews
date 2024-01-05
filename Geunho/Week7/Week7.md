@@ -27,3 +27,150 @@
   깊이 우선 탐색은 깊에 탐색 후 되돌아오는 특성이 있고, 따라서 모든 가능한 해를 찾는 알고리즘 구현이나 그래프 사이클 감지에 활용
   너비 우선 탐색은 가중치가 없는 그래프에서의 최단 경로를 보장, 최단 경로나 네트워크 분석 문제 풀 때 활용
   
+### 몸풀기 문제
+
+#### 깊이 우선 탐색 순회
+
+스택를 활용한 DFS 구현
+
+```bash
+procedure DFS_iterative(G, v) is
+    let S be a stack
+    S.push(v)
+    while S is not empty do
+        v = S.pop()
+        if v is not labeled as discovered then
+            label v as discovered
+            for all edges from v to w in G.adjacentEdges(v) do 
+                S.push(w)
+```
+
+```python
+from collections import defaultdict
+from typing import List
+
+
+def solution(graph: List[List[str]], start: str) -> List[str]:
+    adjacent_list = defaultdict(list)
+
+    for from_node, to_node in graph:
+        adjacent_list[from_node].append(to_node)
+
+    visited = set()
+    stack = [start]
+    answer = []
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            answer.append(node)
+
+            for next_node in adjacent_list[node][::-1]:
+                stack.append(next_node)
+
+    return answer
+```
+
+재귀로 구현한 DFS
+
+```bash
+procedure DFS(G, v) is
+    label v as discovered
+    for all directed edges from v to w that are in G.adjacentEdges(v) do
+        if vertex w is not labeled as discovered then
+            recursively call DFS(G, w)
+```
+
+```python
+from collections import defaultdict
+from typing import List
+
+
+def solution(graph: List[List[str]], start: str) -> List[str]:
+    adjacent_list = defaultdict(list)
+
+    for from_node, to_node in graph:
+        adjacent_list[from_node].append(to_node)
+
+    visited = set()
+    answer = []
+
+    def dfs(current_node: str):
+        visited.add(current_node)
+        answer.append(current_node)
+
+        for node in adjacent_list[current_node]:
+            if node not in visited:
+                dfs(node)
+
+    dfs(start)
+    return answer
+
+
+assert solution([["A", "B"], ["B", "C"], ["C", "D"], ["D", "E"]], "A") == [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+]
+assert solution(
+    [["A", "B"], ["A", "C"], ["B", "D"], ["B", "E"], ["C", "F"], ["E", "F"]], "A"
+) == ["A", "B", "D", "E", "F", "C"]
+```
+
+#### 너비 우선 탐색 순회
+
+큐를 이용하여 쉽게 구현할 수 있음, DFS의 iterative 구조와 거의 유사
+
+```bash
+ 1  procedure BFS(G, root) is
+ 2      let Q be a queue
+ 3      label root as explored
+ 4      Q.enqueue(root)
+ 5      while Q is not empty do
+ 6          v := Q.dequeue()
+ 7          if v is the goal then
+ 8              return v
+ 9          for all edges from v to w in G.adjacentEdges(v) do
+10              if w is not labeled as explored then
+11                  label w as explored
+12                  w.parent := v
+13                  Q.enqueue(w)
+```
+
+```python
+from collections import defaultdict, deque
+from typing import List, Tuple
+
+
+def solution(graph: List[Tuple[int, int]], start: int) -> List[int]:
+    adjacent_list = defaultdict(list)
+
+    for u, v in graph:
+        adjacent_list[u].append(v)
+
+    queue = deque([start])
+    visited = {start}
+    answer = []
+    while queue:
+        node = queue.popleft()
+        answer.append(node)
+        queue.extend([x for x in adjacent_list[node] if x not in visited])
+        visited.update(adjacent_list[node])
+
+    return answer
+
+
+assert solution(
+    [(1, 2), (1, 3), (2, 4), (2, 5), (3, 6), (3, 7), (4, 8), (5, 8), (6, 9), (7, 9)], 1
+) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+assert solution([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0)], 1) == [
+    1,
+    2,
+    3,
+    4,
+    5,
+    0,
+]
+```
