@@ -174,3 +174,80 @@ assert solution([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0)], 1) == [
     0,
 ]
 ```
+
+### 실전 문제
+
+#### [게임 맵 최단거리](https://school.programmers.co.kr/learn/courses/30/lessons/1844)
+
+간선 가중치가 없는 케이스에서의 최단거리를 구해야하므로 아이디어로 BFS를 떠올리면 된다.  
+몇 가지 예외 처리 (좌표, 벽)과 방문 불가능한 케이스만 주의하면 전형적인 BFS 코드로 풀이 가능
+
+```python
+from collections import deque
+from typing import List
+
+
+def solution(maps: List[List[int]]) -> int:
+    def is_valid_coordinate(x: int, y: int) -> bool:
+        return 0 <= x < m and 0 <= y < n and maps[y][x]
+
+    n, m = len(maps), len(maps[0])
+
+    queue = deque([((0, 0), 0)])
+    visited = {(0, 0)}
+    answer = -1
+    while queue:
+        coordinate, num_of_blocks = queue.popleft()
+
+        if coordinate[0] == n - 1 and coordinate[1] == m - 1:
+            answer = num_of_blocks + 1
+            break
+
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            next_x = coordinate[1] + dx
+            next_y = coordinate[0] + dy
+            next_coordinate = (next_y, next_x)
+            if is_valid_coordinate(next_x, next_y) and next_coordinate not in visited:
+                queue.append((next_coordinate, num_of_blocks + 1))
+                visited.add(next_coordinate)
+
+    return answer
+```
+
+#### [네트워크](https://school.programmers.co.kr/learn/courses/30/lessons/43162)
+
+처음에는 Union-Find로 접근해야하나 싶었는데, 서브 네트워크가 트리가 아닌 경우도 있을 수 있으므로 DFS로 풀이해야한다는 것 캐치  
+임의의 노드 (0번이라고 가정)에서 DFS를 쭉 돌고, 방문 처리를 한 후 방문되지 않은 노드를 다시 또 DFS를 하고  
+최종적으로는 모든 노드가 방문할 때까지 DFS를 한 횟수가 연결된 네트워크의 갯수가 된다
+
+```python
+from typing import List
+
+
+def solution(n: int, computers: List[List[int]]) -> int:
+    def dfs(start: int):
+        stack = [start]
+        while stack:
+            node = stack.pop()
+            visited.add(node)
+
+            for index, is_connected in enumerate(computers[node]):
+                if index == node:
+                    continue
+
+                if is_connected and index not in visited:
+                    stack.append(index)
+
+    visited = set()
+    answer = 0
+    for i in range(n):
+        if i not in visited:
+            dfs(i)
+            answer += 1
+
+    return answer
+
+
+assert solution(3, [[1, 1, 0], [1, 1, 0], [0, 0, 1]]) == 2
+assert solution(3, [[1, 1, 0], [1, 1, 1], [0, 1, 1]]) == 1
+```
