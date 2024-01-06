@@ -13,35 +13,31 @@ const asserts = require("assert");
  */
 
 function solution(k, operations) {
-  const disjointSet = Array.from({ length: k }, (_, idx) => idx);
+  const disjointSet = Array.from({ length: k }, (_, idx) => idx); // 초기 노드는 부모노드를 자신의 값으로 설정
 
   for (const operation of operations) {
     const [command, a, b] = operation;
 
-    if (command === "u") {
+    if (command === "u")
       union(find(a, disjointSet), find(b, disjointSet), disjointSet);
-    } else if (command === "f") {
-      find(a, disjointSet);
-    }
+    else if (command === "f") find(a, disjointSet);
   }
-  // 각 노드의 root노드를 찾아 집합 개수 구하기
+
+  // 각 노드의 root노드를 찾아 집합 개수 구하기 : 대표 노드의 개수
   const set = new Set();
-  disjointSet.forEach((parent, index) => {
-    set.add(find(parent, disjointSet));
-  });
+  disjointSet.forEach((parent) => set.add(find(parent, disjointSet)));
 
   return set.size;
 }
-
+// disjointSet[b] = a  a 노드의 대표노드는 b , O(1)
 function union(a, b, disjointSet) {
-  a > b ? (disjointSet[a] = b) : (disjointSet[b] = a);
+  if (a !== b) disjointSet[b] = a;
 }
 
+// 경로 압축을 적용 하게 될 경우 : 평균 시간 복잡도 O(1)에 가까워짐
 function find(a, parent) {
-  //
   if (parent[a] === a) return parent[a];
-  find(parent[a], parent);
-  return parent[a];
+  return (parent[a] = find(parent[a], parent));
 }
 
 asserts.equal(
