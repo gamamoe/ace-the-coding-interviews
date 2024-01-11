@@ -381,3 +381,57 @@ def solution(n: int, computers: List[List[int]]) -> int:
 assert solution(3, [[1, 1, 0], [1, 1, 0], [0, 0, 1]]) == 2
 assert solution(3, [[1, 1, 0], [1, 1, 1], [0, 1, 1]]) == 1
 ```
+
+### [배달](https://school.programmers.co.kr/learn/courses/30/lessons/12978)
+
+그래프 간선의 가중치가 있고, 시작 마을에서 다른 모든 마을의 간선 합을 구해야 하며, 가중치는 음수가 없다  
+조건을 보고 다익스트라 알고리즘을 생각할 수 있어야한다. 
+
+```python
+import heapq
+from collections import defaultdict
+from typing import List
+
+INF = 500_001
+
+
+def solution(N: int, road: List[List[int]], K: int) -> int:
+    graph = defaultdict(list)
+    for u, v, w in road:
+        graph[u].append((v, w))
+        graph[v].append((u, w))
+
+    distance_by_village = {v: INF for v in range(1, N + 1)}
+    distance_by_village[1] = 0
+
+    queue = []
+    heapq.heappush(queue, (0, 1))
+    while queue:
+        current_distance, current_village = heapq.heappop(queue)
+
+        if distance_by_village[current_village] < current_distance:
+            continue
+
+        for next_village, next_distance in graph[current_village]:
+            candidate_distance = current_distance + next_distance
+
+            if candidate_distance < distance_by_village[next_village]:
+                distance_by_village[next_village] = candidate_distance
+                heapq.heappush(queue, (candidate_distance, next_village))
+
+    return len([x for x in distance_by_village.values() if x <= K])
+
+
+assert (
+    solution(5, [[1, 2, 1], [2, 3, 3], [5, 2, 2], [1, 4, 2], [5, 3, 1], [5, 4, 2]], 3)
+    == 4
+)
+assert (
+    solution(
+        6,
+        [[1, 2, 1], [1, 3, 2], [2, 3, 2], [3, 4, 3], [3, 5, 2], [3, 5, 3], [5, 6, 1]],
+        4,
+    )
+    == 4
+)
+```
