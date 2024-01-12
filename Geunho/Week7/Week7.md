@@ -356,6 +356,57 @@ assert solution({"A": {"B": 1}, "B": {"C": 5}, "C": {"D": 1}, "D": {}}, "A") == 
 ]
 ```
 
+#### 벨만-포드 알고리즘
+
+```python
+import math
+from typing import List, Tuple, Any, Union, Dict, Optional
+
+
+def solution(
+    graph: List[List[Tuple[int, int]]], source: int
+) -> List[Union[List[Any], int]]:
+    def relax_edges() -> bool:
+        has_cycle = False
+        for current_node in range(num_of_nodes):
+            for next_node, next_dist in adjacent_list[current_node]:
+                if dist_by_node[current_node] + next_dist < dist_by_node[next_node]:
+                    dist_by_node[next_node] = dist_by_node[current_node] + next_dist
+                    predecessor_by_node[next_node] = current_node
+                    has_cycle = True
+
+        return has_cycle
+
+    adjacent_list = {}
+    dist_by_node = {}
+    predecessor_by_node: Dict[int, Optional[int]] = {}
+    num_of_nodes = len(graph)
+    for node, connection in enumerate(graph):
+        adjacent_list[node] = connection
+        dist_by_node[node] = math.inf
+        predecessor_by_node[node] = None
+
+    dist_by_node[source] = 0
+    for _ in range(num_of_nodes - 1):
+        relax_edges()
+
+    has_negative_cycle = relax_edges()
+    if has_negative_cycle:
+        answer = [-1]
+    else:
+        result_distance = [dist_by_node[x] for x in range(num_of_nodes)]
+        result_predecessor = [predecessor_by_node[x] for x in range(num_of_nodes)]
+        answer = [result_distance, result_predecessor]
+
+    return answer
+
+
+assert solution(
+    [[(1, 4), (2, 3), (4, -6)], [(3, 5)], [(1, 2)], [(0, 7), (2, 4)], [(2, 2)]], 0
+) == [[0, -2, -4, 3, -6], [None, 2, 4, 1, 0]]
+assert solution([[(1, 5), (2, -1)], [(2, 2)], [(3, -2)], [(0, 2), (1, 6)]], 0) == [-1]
+```
+
 ### 실전 문제
 
 #### [게임 맵 최단거리](https://school.programmers.co.kr/learn/courses/30/lessons/1844)
