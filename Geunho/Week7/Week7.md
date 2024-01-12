@@ -100,7 +100,58 @@
 파이썬에서는 decrase_priority가 없으므로 Q 초기화 시 시작 노드만 넣고, decrease priority를 heap push로 변경하는 식으로도 구현이 가능하다
 > Instead of filling the priority queue with all nodes in the initialization phase, it is also possible to initialize it to contain only source; then, inside the if alt < dist[v] block, the decrease_priority() becomes an add_with_priority() operation if the node is not already in the queue.[7]: 198 
 
+### 벨만 포드 알고리즘
 
+다익스트라 알고리즘과 마찬가지로 노드에서 노드까지의 최소 비용을 구하는 알고리즘  
+다익스트라 알고리즘과 다르게 음의 가중치가 있어도 최단 경로를 구할 수 있고, 음의 순환 역시 감지할 수 있다
+
+```shell
+function BellmanFord(list vertices, list edges, vertex source) is
+
+    // This implementation takes in a graph, represented as
+    // lists of vertices (represented as integers [0..n-1]) and edges,
+    // and fills two arrays (distance and predecessor) holding
+    // the shortest path from the source to each vertex
+
+    distance := list of size n
+    predecessor := list of size n
+
+    // Step 1: initialize graph
+    for each vertex v in vertices do
+        // Initialize the distance to all vertices to infinity
+        distance[v] := inf
+        // And having a null predecessor
+        predecessor[v] := null
+    
+    // The distance from the source to itself is, of course, zero
+    distance[source] := 0
+
+    // Step 2: relax edges repeatedly
+    repeat |V|−1 times:
+        for each edge (u, v) with weight w in edges do
+            if distance[u] + w < distance[v] then
+                distance[v] := distance[u] + w
+                predecessor[v] := u
+
+    // Step 3: check for negative-weight cycles
+    for each edge (u, v) with weight w in edges do
+        if distance[u] + w < distance[v] then
+            predecessor[v] := u
+            // A negative cycle exists; find a vertex on the cycle 
+            visited := list of size n initialized with false
+            visited[v] := true
+            while not visited[u] do
+                visited[u] := true
+                u := predecessor[u]
+            // u is a vertex in a negative cycle, find the cycle itself
+            ncycle := [u]
+            v := predecessor[u]
+            while v != u do
+                ncycle := concatenate([v], ncycle)
+                v := predecessor[v]
+            error "Graph contains a negative-weight cycle", ncycle
+    return distance, predecessor
+```
 
 ### 몸풀기 문제
 
@@ -434,4 +485,44 @@ assert (
     )
     == 4
 )
+```
+
+### 추가 문제
+
+### 가장 먼 노드
+
+간선 가중치가 없고, 특정 노드 (1번 노드)에서 가장 먼 노드의 갯수를 구하는 것이므로 BFS를 통해 쉽게 계산할 수 있다
+
+```python
+from collections import defaultdict, deque
+from typing import List
+
+
+def solution(n: int, edge: List[List[int]]) -> int:
+    graph = defaultdict(list)
+
+    for u, v in edge:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    start_node = 1
+    queue = deque([(start_node, 0)])
+    visited = {start_node: 1}
+    max_distance = 1
+    while queue:
+        current_node, current_distance = queue.popleft()
+        max_distance = max(max_distance, current_distance)
+
+        for next_node in graph[current_node]:
+            if next_node not in visited:
+                visited[next_node] = current_distance + 1
+                queue.append((next_node, current_distance + 1))
+
+    answer = len(
+        [node for node, distance in visited.items() if distance == max_distance]
+    )
+    return answer
+
+
+assert solution(6, [[3, 6], [4, 3], [3, 2], [1, 3], [1, 2], [2, 4], [5, 2]]) == 3
 ```
