@@ -538,9 +538,70 @@ assert (
 )
 ```
 
+#### [전력망을 둘로 나누기](https://school.programmers.co.kr/learn/courses/30/lessons/86971)
+
+Idea -> `2 <= n <= 100` 이므로 시간 제약 조건이 빡빡하지 않은 점을 캐치해야 함  
+주어진 wires에서 하나씩 빼고 그래프 생성 후, dfs를 활용하여 분리된 노드 갯수 세면서 갱신하는 식으로 아래와 같이 구현  
+좀 더 스마트한 방법으로는 wires의 [u, v]가 끊어졌다고 가정하면, 아래 코드처럼 무식하게 1부터 n + 1까지 dfs를 방문 노드 모두 마킹할 때 까지가 아니라  
+dfs(u), dfs(v) 두 번 호출하는 식으로도 작성이 가능하다, 또는 dfs(u)만 계산 후 전체 노드 갯수에서 빼도 된다
+
+```python
+import math
+from collections import defaultdict
+from typing import List, Set
+
+
+def solution(n: int, wires: List[List[int]]) -> int:
+    def dfs(start_node: int) -> Set[int]:
+        stack = [start_node]
+        node_set = set()
+        while stack:
+            current_node = stack.pop()
+            if current_node not in node_set:
+                node_set.add(current_node)
+                for next_node in graph[current_node]:
+                    stack.append(next_node)
+
+        return node_set
+
+    graph = defaultdict(set)
+    for u, v in wires:
+        graph[u].add(v)
+        graph[v].add(u)
+
+    answer = math.inf
+    for u, v in wires:
+        # Remove u, v
+        graph[u].remove(v)
+        graph[v].remove(u)
+
+        visited = set()
+        network_sizes = []
+        for node in range(1, n + 1):
+            if node not in visited:
+                dfs_result = dfs(node)
+                visited.update(dfs_result)
+                network_sizes.append(len(dfs_result))
+
+        answer = min(answer, abs(network_sizes[0] - network_sizes[1]))
+
+        # Restore u, v
+        graph[u].add(v)
+        graph[v].add(u)
+
+    return answer
+
+
+assert (
+    solution(9, [[1, 3], [2, 3], [3, 4], [4, 5], [4, 6], [4, 7], [7, 8], [7, 9]]) == 3
+)
+assert solution(4, [[1, 2], [2, 3], [3, 4]]) == 0
+assert solution(7, [[1, 2], [2, 7], [3, 7], [3, 4], [4, 5], [6, 7]]) == 1
+```
+
 ### 추가 문제
 
-### 가장 먼 노드
+#### [가장 먼 노드](https://school.programmers.co.kr/learn/courses/30/lessons/49189)
 
 간선 가중치가 없고, 특정 노드 (1번 노드)에서 가장 먼 노드의 갯수를 구하는 것이므로 BFS를 통해 쉽게 계산할 수 있다
 
