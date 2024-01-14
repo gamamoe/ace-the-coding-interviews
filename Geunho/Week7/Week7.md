@@ -638,3 +638,108 @@ def solution(n: int, edge: List[List[int]]) -> int:
 
 assert solution(6, [[3, 6], [4, 3], [3, 2], [1, 3], [1, 2], [2, 4], [5, 2]]) == 3
 ```
+
+#### [합승 택시 요금](https://school.programmers.co.kr/learn/courses/30/lessons/72413)
+
+간선 가중치가 있는 그래프이며, 음의 가중치는 없고 최소 (또는 최단) 관련 문제이므로 다익스트라 알고리즘으로 접근했다  
+예제 3개를 통해서 얻을 수 있는 경우의 수는 다음과 같다
+
+1. 시작점부터 경유지(경유지는 도착지와는 다른 노드)까지 동행 후, 경유지에서 각각의 도착지까지의 합이 최소 비용인 경우
+2. 처음부터 시작점에서 각각의 도착지까지의 합이 최소 비용인 경우
+3. 시작점부터 경유지를 거치지만, 경유지가 둘 중 하나의 도착지와 같은 경우
+
+내 경우 다익스트라 알고리즘을 통해 우선 시작점 -> 도착지 A, 시작점 -> 도착지 B의 비용 합을 먼저 계산했다  
+그 후 가능한 중간 노드를 순회하는데, 이 때 시작점 -> 경유지는 이전 과정에서의 distance를 활용해서 바로 게산할 수 있고  
+시작점을 경유지로 하는 다익스트라 알고리즘을 다시 계산하여 경유지 -> 도작지 A, 경유지 -> 도착지 B를 계산함  
+최종적으로는 가능한 케이스 중 최솟값을 반환하는 방식, 다익스트라 알고리즘 한번의 시간복잡도를 O(ElogV)로 본다면 해당 풀이는 O(V*ElogV)
+
+```python
+import heapq
+import math
+from collections import defaultdict
+from typing import List, Dict
+
+
+def solution(n: int, s: int, a: int, b: int, fares: List[List[int]]) -> int:
+    graph = defaultdict(list)
+
+    for u, v, w in fares:
+        graph[u].append((v, w))
+        graph[v].append((u, w))
+
+    def shortest_path(start_node: int) -> Dict[int, float]:
+        distance_by_node = {node: math.inf for node in range(1, n + 1)}
+        distance_by_node[start_node] = 0
+        queue = []
+        heapq.heappush(queue, (distance_by_node[start_node], start_node))
+
+        while queue:
+            current_distance, current_node = heapq.heappop(queue)
+            if distance_by_node[current_node] < current_distance:
+                continue
+
+            for adjacent_node, cost in graph[current_node]:
+                alternative_distance = current_distance + cost
+                if alternative_distance < distance_by_node[adjacent_node]:
+                    distance_by_node[adjacent_node] = alternative_distance
+                    heapq.heappush(queue, (alternative_distance, adjacent_node))
+
+        return distance_by_node
+
+    shortest_distance_from_start = shortest_path(s)
+    answer = shortest_distance_from_start[a] + shortest_distance_from_start[b]
+    for stopover_node in range(1, n + 1):
+        shortest_distance_from_stopover = shortest_path(stopover_node)
+        answer = min(
+            answer,
+            shortest_distance_from_start[stopover_node]
+            + shortest_distance_from_stopover[a]
+            + shortest_distance_from_stopover[b],
+        )
+
+    return answer
+
+
+assert (
+    solution(
+        6,
+        4,
+        6,
+        2,
+        [
+            [4, 1, 10],
+            [3, 5, 24],
+            [5, 6, 2],
+            [3, 1, 41],
+            [5, 1, 24],
+            [4, 6, 50],
+            [2, 4, 66],
+            [2, 3, 22],
+            [1, 6, 25],
+        ],
+    )
+    == 82
+)
+assert (
+    solution(7, 3, 4, 1, [[5, 7, 9], [4, 6, 4], [3, 6, 1], [3, 2, 3], [2, 1, 6]]) == 14
+)
+assert (
+    solution(
+        6,
+        4,
+        5,
+        6,
+        [
+            [2, 6, 6],
+            [6, 3, 7],
+            [4, 6, 7],
+            [6, 5, 11],
+            [2, 5, 12],
+            [5, 3, 20],
+            [2, 4, 8],
+            [4, 3, 9],
+        ],
+    )
+    == 18
+)
+```
