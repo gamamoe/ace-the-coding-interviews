@@ -26,7 +26,133 @@
   깊이 우선 탐색은 재귀 호출 또는 스택을 사용해서 구현 가능하며, 너비 우선 탐색은 큐를 활용하여 구현함
   깊이 우선 탐색은 깊에 탐색 후 되돌아오는 특성이 있고, 따라서 모든 가능한 해를 찾는 알고리즘 구현이나 그래프 사이클 감지에 활용
   너비 우선 탐색은 가중치가 없는 그래프에서의 최단 경로를 보장, 최단 경로나 네트워크 분석 문제 풀 때 활용
-  
+
+### 다익스트라 알고리즘
+
+그래프 형태에 따라 다르지만, 최단 경로의 뉘앙스가 나는 문제는 대부분 다익스트라 알고리즘으로 접근 가능  
+예외) 간선의 가중치가 없거나 (이 경우 BFS 접근), 음수 가중치가 있는 경우 (벨만-포드 알고리즘)  
+
+의사 코드는 다음과 같다
+1. 거리와 직전 노드를 저장할 자료구조를 선언하고, 방문하지 않은 노드 중 가장 비용이 작은 노드를 선택
+2. 현재 노드에서 이동 가능한 노드의 거리와 최소 비용의 합이 기존 노드 거리보다 작으면 갱신
+3. 이 과정을 계속 반복한다
+
+```shell
+ 1  function Dijkstra(Graph, source):
+ 2      
+ 3      for each vertex v in Graph.Vertices:
+ 4          dist[v] ← INFINITY
+ 5          prev[v] ← UNDEFINED
+ 6          add v to Q
+ 7      dist[source] ← 0
+ 8      
+ 9      while Q is not empty:
+10          u ← vertex in Q with min dist[u]
+11          remove u from Q
+12          
+13          for each neighbor v of u still in Q:
+14              alt ← dist[u] + Graph.Edges(u, v)
+15              if alt < dist[v]:
+16                  dist[v] ← alt
+17                  prev[v] ← u
+18
+19      return dist[], prev[]
+```
+
+최단 거리는 prev를 거슬러 올라가면서 구하면 되는 데, 의사 코드는 아래와 같음
+
+```shell
+1  S ← empty sequence
+2  u ← target
+3  if prev[u] is defined or u = source:          // Do something only if the vertex is reachable
+4      while u is defined:                       // Construct the shortest path with a stack S
+5          insert u at the beginning of S        // Push the vertex onto the stack
+6          u ← prev[u]                           // Traverse from target to source
+```
+
+우선순위 큐를 활용하면 더 효율적으로 계산이 가능하며 의사코드는 아래와 같다
+```shell
+1  function Dijkstra(Graph, source):
+2      dist[source] ← 0                           // Initialization
+3
+4      create vertex priority queue Q
+5
+6      for each vertex v in Graph.Vertices:
+7          if v ≠ source
+8              dist[v] ← INFINITY                 // Unknown distance from source to v
+9              prev[v] ← UNDEFINED                // Predecessor of v
+10
+11         Q.add_with_priority(v, dist[v])
+12
+13
+14     while Q is not empty:                      // The main loop
+15         u ← Q.extract_min()                    // Remove and return best vertex
+16         for each neighbor v of u:              // Go through all v neighbors of u
+17             alt ← dist[u] + Graph.Edges(u, v)
+18             if alt < dist[v]:
+19                 dist[v] ← alt
+20                 prev[v] ← u
+21                 Q.decrease_priority(v, alt)
+22
+23     return dist, prev
+```
+
+파이썬에서는 decrase_priority가 없으므로 Q 초기화 시 시작 노드만 넣고, decrease priority를 heap push로 변경하는 식으로도 구현이 가능하다
+> Instead of filling the priority queue with all nodes in the initialization phase, it is also possible to initialize it to contain only source; then, inside the if alt < dist[v] block, the decrease_priority() becomes an add_with_priority() operation if the node is not already in the queue.[7]: 198 
+
+### 벨만 포드 알고리즘
+
+다익스트라 알고리즘과 마찬가지로 노드에서 노드까지의 최소 비용을 구하는 알고리즘  
+다익스트라 알고리즘과 다르게 음의 가중치가 있어도 최단 경로를 구할 수 있고, 음의 순환 역시 감지할 수 있다
+
+```shell
+function BellmanFord(list vertices, list edges, vertex source) is
+
+    // This implementation takes in a graph, represented as
+    // lists of vertices (represented as integers [0..n-1]) and edges,
+    // and fills two arrays (distance and predecessor) holding
+    // the shortest path from the source to each vertex
+
+    distance := list of size n
+    predecessor := list of size n
+
+    // Step 1: initialize graph
+    for each vertex v in vertices do
+        // Initialize the distance to all vertices to infinity
+        distance[v] := inf
+        // And having a null predecessor
+        predecessor[v] := null
+    
+    // The distance from the source to itself is, of course, zero
+    distance[source] := 0
+
+    // Step 2: relax edges repeatedly
+    repeat |V|−1 times:
+        for each edge (u, v) with weight w in edges do
+            if distance[u] + w < distance[v] then
+                distance[v] := distance[u] + w
+                predecessor[v] := u
+
+    // Step 3: check for negative-weight cycles
+    for each edge (u, v) with weight w in edges do
+        if distance[u] + w < distance[v] then
+            predecessor[v] := u
+            // A negative cycle exists; find a vertex on the cycle 
+            visited := list of size n initialized with false
+            visited[v] := true
+            while not visited[u] do
+                visited[u] := true
+                u := predecessor[u]
+            // u is a vertex in a negative cycle, find the cycle itself
+            ncycle := [u]
+            v := predecessor[u]
+            while v != u do
+                ncycle := concatenate([v], ncycle)
+                v := predecessor[v]
+            error "Graph contains a negative-weight cycle", ncycle
+    return distance, predecessor
+```
+
 ### 몸풀기 문제
 
 #### 깊이 우선 탐색 순회
@@ -175,79 +301,108 @@ assert solution([(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0)], 1) == [
 ]
 ```
 
-### 실전 문제
+#### 다익스트라 알고리즘
 
-#### [게임 맵 최단거리](https://school.programmers.co.kr/learn/courses/30/lessons/1844)
-
-간선 가중치가 없는 케이스에서의 최단거리를 구해야하므로 아이디어로 BFS를 떠올리면 된다.  
-몇 가지 예외 처리 (좌표, 벽)과 방문 불가능한 케이스만 주의하면 전형적인 BFS 코드로 풀이 가능
+저자 코드와는 약간 상이하지만 전체적인 맥락은 동일함, 큐에서 빼고 경로를 갱신한다는 아이디어를 잘 가져갈 것
 
 ```python
+import heapq
+import sys
 from collections import deque
-from typing import List
+from typing import Dict, List
 
 
-def solution(maps: List[List[int]]) -> int:
-    def is_valid_coordinate(x: int, y: int) -> bool:
-        return 0 <= x < m and 0 <= y < n and maps[y][x]
+def solution(graph: Dict[str, Dict[str, int]], start: str) -> List:
+    queue = [(0, start)]
+    check = {start}
 
-    n, m = len(maps), len(maps[0])
+    dist = {node: sys.maxsize for node in graph}
+    dist[start] = 0
+    prev = {start: start}
 
-    queue = deque([((0, 0), 0)])
-    visited = {(0, 0)}
-    answer = -1
     while queue:
-        coordinate, num_of_blocks = queue.popleft()
+        dist_u, u = heapq.heappop(queue)
+        for v, edge_dist in graph[u].items():
+            alt = dist_u + edge_dist
+            if alt < dist[v]:
+                dist[v] = alt
+                prev[v] = u
+                if v not in check:
+                    check.add(v)
+                    heapq.heappush(queue, (alt, v))
 
-        if coordinate[0] == n - 1 and coordinate[1] == m - 1:
-            answer = num_of_blocks + 1
-            break
+    def get_path(target):
+        path = deque()
+        current_node = target
 
-        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            next_x = coordinate[1] + dx
-            next_y = coordinate[0] + dy
-            next_coordinate = (next_y, next_x)
-            if is_valid_coordinate(next_x, next_y) and next_coordinate not in visited:
-                queue.append((next_coordinate, num_of_blocks + 1))
-                visited.add(next_coordinate)
+        while current_node != start:
+            path.appendleft(current_node)
+            current_node = prev[current_node]
 
-    return answer
+        path.appendleft(start)
+        return list(path)
+
+    path_result = {v: get_path(v) for v in graph}
+    return [dist, path_result]
+
+
+assert solution({"A": {"B": 9, "C": 3}, "B": {"A": 5}, "C": {"B": 1}}, "A") == [
+    {"A": 0, "B": 4, "C": 3},
+    {"A": ["A"], "B": ["A", "C", "B"], "C": ["A", "C"]},
+]
+assert solution({"A": {"B": 1}, "B": {"C": 5}, "C": {"D": 1}, "D": {}}, "A") == [
+    {"A": 0, "B": 1, "C": 6, "D": 7},
+    {"A": ["A"], "B": ["A", "B"], "C": ["A", "B", "C"], "D": ["A", "B", "C", "D"]},
+]
 ```
 
-#### [네트워크](https://school.programmers.co.kr/learn/courses/30/lessons/43162)
-
-처음에는 Union-Find로 접근해야하나 싶었는데, 서브 네트워크가 트리가 아닌 경우도 있을 수 있으므로 DFS로 풀이해야한다는 것 캐치  
-임의의 노드 (0번이라고 가정)에서 DFS를 쭉 돌고, 방문 처리를 한 후 방문되지 않은 노드를 다시 또 DFS를 하고  
-최종적으로는 모든 노드가 방문할 때까지 DFS를 한 횟수가 연결된 네트워크의 갯수가 된다
+#### 벨만-포드 알고리즘
 
 ```python
-from typing import List
+import math
+from typing import List, Tuple, Any, Union, Dict, Optional
 
 
-def solution(n: int, computers: List[List[int]]) -> int:
-    def dfs(start: int):
-        stack = [start]
-        while stack:
-            node = stack.pop()
-            visited.add(node)
+def solution(
+    graph: List[List[Tuple[int, int]]], source: int
+) -> List[Union[List[Any], int]]:
+    def relax_edges() -> bool:
+        has_cycle = False
+        for current_node in range(num_of_nodes):
+            for next_node, next_dist in adjacent_list[current_node]:
+                if dist_by_node[current_node] + next_dist < dist_by_node[next_node]:
+                    dist_by_node[next_node] = dist_by_node[current_node] + next_dist
+                    predecessor_by_node[next_node] = current_node
+                    has_cycle = True
 
-            for index, is_connected in enumerate(computers[node]):
-                if index == node:
-                    continue
+        return has_cycle
 
-                if is_connected and index not in visited:
-                    stack.append(index)
+    adjacent_list = {}
+    dist_by_node = {}
+    predecessor_by_node: Dict[int, Optional[int]] = {}
+    num_of_nodes = len(graph)
+    for node, connection in enumerate(graph):
+        adjacent_list[node] = connection
+        dist_by_node[node] = math.inf
+        predecessor_by_node[node] = None
 
-    visited = set()
-    answer = 0
-    for i in range(n):
-        if i not in visited:
-            dfs(i)
-            answer += 1
+    dist_by_node[source] = 0
+    for _ in range(num_of_nodes - 1):
+        relax_edges()
+
+    has_negative_cycle = relax_edges()
+    if has_negative_cycle:
+        answer = [-1]
+    else:
+        result_distance = [dist_by_node[x] for x in range(num_of_nodes)]
+        result_predecessor = [predecessor_by_node[x] for x in range(num_of_nodes)]
+        answer = [result_distance, result_predecessor]
 
     return answer
 
 
-assert solution(3, [[1, 1, 0], [1, 1, 0], [0, 0, 1]]) == 2
-assert solution(3, [[1, 1, 0], [1, 1, 1], [0, 1, 1]]) == 1
+assert solution(
+    [[(1, 4), (2, 3), (4, -6)], [(3, 5)], [(1, 2)], [(0, 7), (2, 4)], [(2, 2)]], 0
+) == [[0, -2, -4, 3, -6], [None, 2, 4, 1, 0]]
+assert solution([[(1, 5), (2, -1)], [(2, 2)], [(3, -2)], [(0, 2), (1, 6)]], 0) == [-1]
 ```
