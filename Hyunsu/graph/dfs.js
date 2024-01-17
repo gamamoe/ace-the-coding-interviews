@@ -69,7 +69,7 @@ function solution2(graph, start) {
 
 /**
  * Stack을 이용한 dfs
- * O(E) + O(V*V )
+ * O(E) + O(V)
  */
 
 function dfs(graph, start) {
@@ -83,6 +83,7 @@ function dfs(graph, start) {
   while (stack.length) {
     const top = stack.pop();
     result.push(top);
+    if (visited[top]) continue;
     visited[top] = 1; //방문처리
     //인접 노드 탐색
     stack.push(...(adjList[top] || [])); // 방문할 노드를 스택에 모두 넣는다.
