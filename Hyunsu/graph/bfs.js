@@ -21,9 +21,9 @@ function solution(graph, start) {
     while (queue.length) {
       const nextList = adjList[queue.shift()];
       (nextList || []).forEach((next) => {
-        if (result.includes(next)) return false;
-        result.push(next);
-        queue.push(next);
+        if (result.includes(next)) return false; //이미 방문한 노드면 continue
+        result.push(next); //방문처리
+        queue.push(next); //방문처리
       });
     }
   }
