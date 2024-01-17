@@ -26,7 +26,7 @@ function solution(N, road, K) {
     adj_list[v]?.forEach((info, i) => {
       // queue에 넣을 때 [마을, 현재 가중치 + 합산 가중치  ]
       const [adj_v, adj_w] = info;
-      let future_w = w + adj_w;
+      let future_w = w + adj_w; //bfs경로를 통한 누적 가중치 + 노드가 가진 가중치
       //방문 안한 경우
       if (visited[adj_v]) return false;
       // 가중치 조건 적용 <=K
