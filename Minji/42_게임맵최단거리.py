@@ -2,12 +2,11 @@ from collections import deque
 
 def solution(maps):
   n, m = len(maps), len(maps[0])
-  deq = deque([(0, 0)])
-  visited = [[0, 0]]
-  answer = -1
+  deq = deque([((0, 0), 1)])
+  visited = {(0, 0)}
   
   while deq:
-    loc = deq.popleft()
+    loc, dist = deq.popleft()
     
     for x, y in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
       row = loc[0] + x
@@ -21,12 +20,17 @@ def solution(maps):
       if maps[row][col] == 0:
         continue
       
-      next_loc = [row, col]
+      next_loc = (row, col)
       if next_loc not in visited:
-        deq.append(next_loc)
-        visited.append(next_loc)
-  
-  return answer
+        deq.append((next_loc, dist + 1))
+        visited.add(next_loc)
+        
+        # 도착
+        if next_loc == (n - 1, m - 1):
+          return dist + 1
+        
+  # 도착 불가
+  return -1
 
 assert solution([[1, 0, 1, 1, 1], [1, 0, 1, 0, 1], [1, 0, 1, 1, 1], [1, 1, 1, 0, 1], [0, 0, 0, 0, 1]]) == 11
 assert solution([[1, 0, 1, 1, 1], [1, 0, 1, 0, 1], [1, 0, 1, 1, 1], [1, 1, 1, 0, 0], [0, 0, 0, 0, 1]]) == -1
