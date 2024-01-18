@@ -22,9 +22,7 @@ function solution(maps) {
 
   while (queue.length) {
     const [y, x] = queue.shift();
-    if (x === 2 && y === 2) {
-      const a = 1;
-    }
+
     for (let i = 0; i < 4; i++) {
       let ny = dy[i] + y;
       let nx = dx[i] + x;
