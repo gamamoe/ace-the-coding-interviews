@@ -75,7 +75,7 @@ assert solution(3, [[1, 1, 0], [1, 1, 0], [0, 0, 1]]) == 2
 assert solution(3, [[1, 1, 0], [1, 1, 1], [0, 1, 1]]) == 1
 ```
 
-### [배달](https://school.programmers.co.kr/learn/courses/30/lessons/12978)
+#### [배달](https://school.programmers.co.kr/learn/courses/30/lessons/12978)
 
 그래프 간선의 가중치가 있고, 시작 마을에서 다른 모든 마을의 간선 합을 구해야 하며, 가중치는 음수가 없다  
 조건을 보고 다익스트라 알고리즘을 생각할 수 있어야한다. 
@@ -126,6 +126,85 @@ assert (
         4,
     )
     == 4
+)
+```
+
+#### [경주로 건설]
+
+어려운 문제. 최소 비용을 구하는 점에서 BFS를 활용하는 것까지는 캐치하나  
+직선 도로, 코너를 고려한 cost 갱신과 방문 처리 부분이 매우 까다로움
+
+```python
+import math
+from collections import deque
+from typing import List
+
+
+def solution(board: List[List[int]]) -> int:
+    def is_valid_move(r, c):
+        return 0 <= r < n and 0 <= c < n and not board[r][c]
+
+    n = len(board)
+
+    queue = deque([(0, 0, -1, 0)])  # row, col, direction, cost
+    visited = [[[0 for _ in range(4)] for _ in range(n)] for _ in range(n)]
+    answer = math.inf
+
+    while queue:
+        row, col, prev_direction, cost = queue.popleft()
+
+        for direction, (drow, dcol) in enumerate([(0, -1), (-1, 0), (0, 1), (1, 0)]):
+            new_row, new_col = row + drow, col + dcol
+
+            if not is_valid_move(new_row, new_col):
+                continue
+
+            if prev_direction == -1 or (prev_direction - direction) % 2 == 0:
+                new_cost = cost + 100
+            else:
+                new_cost = cost + 600
+
+            if (new_row, new_col) == (n - 1, n - 1):
+                answer = min(answer, new_cost)
+            elif (
+                visited[new_row][new_col][direction] == 0
+                or visited[new_row][new_col][direction] > new_cost
+            ):
+                queue.append((new_row, new_col, direction, new_cost))
+                visited[new_row][new_col][direction] = new_cost
+
+    return answer
+
+
+assert solution([[0, 0, 0], [0, 0, 0], [0, 0, 0]]) == 900
+assert (
+    solution(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 1],
+            [0, 0, 1, 0, 0, 0, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
+    == 3800
+)
+assert solution([[0, 0, 1, 0], [0, 0, 0, 0], [0, 1, 0, 1], [1, 0, 0, 0]]) == 2100
+assert (
+    solution(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 0],
+            [0, 0, 1, 0, 0, 0],
+            [1, 0, 0, 1, 0, 1],
+            [0, 1, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0],
+        ]
+    )
+    == 3200
 )
 ```
 
@@ -333,4 +412,89 @@ assert (
     )
     == 18
 )
+```
+
+#### [타겟 넘버](https://school.programmers.co.kr/learn/courses/30/lessons/43165)
+
+그래프에서의 순회는 아니지만 정수 배열의 순서를 바꾸지 않고 가능한 모든 경로를 찾는다는 점에서 DFS를 활용할 수 있다  
+앞에서부터 정수의 +/-를 누적해가면서 경로의 마지막일 때 target과 값이 같은 지 체크하는 방식으로 풀이
+
+```python
+from typing import List
+
+
+def solution(numbers: List[int], target: int) -> int:
+    stack = [(-1, 0)]  # (Index, Sum)
+    answer = 0
+    while stack:
+        index, sum_of_equation = stack.pop()
+
+        if index == len(numbers) - 1:
+            if sum_of_equation == target:
+                answer += 1
+            continue
+
+        number = numbers[index + 1]
+        stack.append((index + 1, sum_of_equation - number))
+        stack.append((index + 1, sum_of_equation + number))
+
+    return answer
+
+
+assert solution([4, 1, 2, 1], 4) == 2
+assert solution([1, 1, 1, 1, 1], 3) == 5
+```
+
+#### [여행경로](https://school.programmers.co.kr/learn/courses/30/lessons/43164)
+
+테스트 케이스 1번만 실패하는 코드 (In progress)
+
+```python
+import copy
+from collections import defaultdict
+from typing import List
+
+
+def solution(tickets: List[List[str]]) -> List[str]:
+    graph = defaultdict(list)
+    for u, v in tickets:
+        graph[u].append(v)
+
+    candidate = []
+    for next_node in graph["ICN"]:
+        start_node = ("ICN", next_node)
+        stack = [(start_node, list(start_node), set())]
+
+        while stack:
+            current_node, path, visited = stack.pop()
+
+            if len(path) == len(tickets) + 1:
+                candidate.append(path)
+                continue
+
+            if current_node not in visited:
+                visited.add(current_node)
+                for adj_node in graph[current_node[1]]:
+                    if (current_node[1], adj_node) not in visited:
+                        stack.append(
+                            (
+                                (current_node[1], adj_node),
+                                path + [adj_node],
+                                copy.deepcopy(visited),
+                            )
+                        )
+
+    sorted_path = sorted(candidate, key=lambda p: "".join(p))
+    return sorted_path[0]
+
+
+assert solution([["ICN", "JFK"], ["HND", "IAD"], ["JFK", "HND"]]) == [
+    "ICN",
+    "JFK",
+    "HND",
+    "IAD",
+]
+assert solution(
+    [["ICN", "SFO"], ["ICN", "ATL"], ["SFO", "ATL"], ["ATL", "ICN"], ["ATL", "SFO"]]
+) == ["ICN", "ATL", "ICN", "SFO", "ATL", "SFO"]
 ```
