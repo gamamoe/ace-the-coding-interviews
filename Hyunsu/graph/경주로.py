@@ -10,33 +10,33 @@ def solution(board):
     heapq.heappush(hq, (0,None,0,0))
     visited = [ [float("inf")]*len(board) for i in range(len(board))  ]
     while(hq):
-        w, axios, y, x =heapq.heappop(hq)
-        _axios = axios 
-        print(w, axios, y, x)
+        w, axis, y, x =heapq.heappop(hq)
+        _axis = axis 
+        print(w, axis, y, x)
         for i in range(4):
             nx= x+dx[i]
             ny = y+dy[i]
 
             if(nx<0 or ny<0 or nx>=len(board) or ny>=len(board) or board[ny][nx] ==1):
                 continue 
-            if axios == None: 
+            if axis == None: 
                 if( ny == y and nx!=x):
-                    _axios = "x"
+                    _axis = "x"
                 elif(nx == x and ny!=y):
-                    _axios = "y"
-            next_axios = _axios
+                    _axis = "y"
+            next_axis = _axis
             if( ny == y and nx!=x):
-                next_axios = "x"
+                next_axis = "x"
             elif(nx == x and ny!=y):
-                next_axios = "y"  
+                next_axis = "y"  
 
-            isCorner =  _axios != next_axios
+            isCorner =  _axis != next_axis
             corner_w =  500 if isCorner else 0 
             next_w = w+100+corner_w
             # visited 값과 비교 하여 작으면  visited 값 갱신
             if next_w <= visited[ny][nx]:
                 visited[ny][nx] = next_w
-                heapq.heappush(hq, (next_w, next_axios, ny, nx)) #heapq에 넣기 
+                heapq.heappush(hq, (next_w, next_axis, ny, nx)) #heapq에 넣기 
     print(visited[-1][-1])        
     return visited[-1][-1]
 
