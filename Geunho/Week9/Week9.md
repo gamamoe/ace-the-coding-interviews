@@ -79,3 +79,27 @@ assert solution(7) == [
 ```
 
 ### 실전 문제
+
+#### [피로도](https://school.programmers.co.kr/learn/courses/30/lessons/87946)
+
+```python
+from itertools import permutations
+from typing import List
+
+
+def solution(k: int, dungeons: List[List[int]]) -> int:
+    answer = -1
+    for permutation in permutations([x for x in range(len(dungeons))]):
+        current_val = k
+        num_of_dungeon = 0
+        for index in permutation:
+            if current_val >= dungeons[index][0]:
+                num_of_dungeon += 1
+                current_val -= dungeons[index][1]
+        answer = max(answer, num_of_dungeon)
+
+    return answer
+
+
+assert solution(80, [[80, 20], [50, 40], [30, 10]]) == 3
+```
