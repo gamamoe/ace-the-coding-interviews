@@ -103,3 +103,207 @@ def solution(k: int, dungeons: List[List[int]]) -> int:
 
 assert solution(80, [[80, 20], [50, 40], [30, 10]]) == 3
 ```
+
+#### [N-Queen](https://school.programmers.co.kr/learn/courses/30/lessons/12952)
+
+(0, 0)부터 시작해서 상태 트리를 그리고 구현에 옮기는 연습이 필요  
+현재 행 정보와, 체스판에 놓은 좌표를 들고 갱신하며 현재 행이 마지막 행까지 온 경우 퀸을 놓을 수 있는 경우이다  
+말판을 놓을 때 탐색에 들어가는 조건은 같은 열이 아니고, 대각선에 위치하지 않을 때만 탐색에 들어간다  
+
+```python
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class Coordinate:
+    row: int
+    col: int
+
+
+def solution(n: int) -> int:
+    answer = []
+
+    def search(row: int, coordinates: List[Coordinate]):
+        if row == n:
+            answer.append(1)
+            return
+
+        for col in range(n):
+            early_return = False
+            for coord in coordinates:
+                prev_row, prev_col = coord.row, coord.col
+                if prev_col == col or abs(prev_col - col) == abs(prev_row - row):
+                    early_return = True
+                    break
+
+            if not early_return:
+                search(row + 1, coordinates + [Coordinate(row, col)])
+
+    search(0, [])
+    return len(answer)
+
+
+assert solution(4) == 2
+```
+
+#### [양궁대회](https://school.programmers.co.kr/learn/courses/30/lessons/92342)
+
+시간 초과 코드, 어피치의 사전을 구성하고, Ryan의 사전을 가능한 경우의 수에 따라 계산하는 방식인데  
+중간에 백트래킹이나 특정 부분이 잘못 구현된 것으로 보임  
+파이썬을 사용할 때는 특별히 제한이 없는 한 표준 라이브러리를 활용하자
+
+```python
+import copy
+import math
+from collections import defaultdict
+from typing import Sequence, List, Mapping
+
+
+def solution(n: int, info: Sequence[int]) -> List[int]:
+    answer = [-1]
+    score_tracking = [-math.inf]
+    apeach_score_counter = {}
+    for index, value in enumerate(info):
+        apeach_score_counter[10 - index] = value
+
+    def calculate_scores(ryan_score_counter: Mapping[int, int]):
+        _apeach_score = 0
+        _ryan_score = 0
+        for i in range(1, 10 + 1):
+            if ryan_score_counter[i] > apeach_score_counter[i]:
+                _ryan_score += i
+            elif ryan_score_counter[i] < apeach_score_counter[i]:
+                _apeach_score += i
+            elif (
+                ryan_score_counter[i] == apeach_score_counter[i]
+                and ryan_score_counter[i] != 0
+            ):
+                _apeach_score += i
+            else:
+                continue
+
+        return _apeach_score, _ryan_score
+
+    def search(num_shoot: int, ryan_score_counter: Mapping[int, int]):
+        if num_shoot == n:
+            # 어피치, 라이언 점수 계산
+            # 라이언이 이기면서 이점 점수 차보다 크거나 같으면 저장
+            apeach_score, ryan_score = calculate_scores(ryan_score_counter)
+            if ryan_score > apeach_score:
+                if ryan_score - apeach_score > score_tracking[0]:
+                    score_tracking[0] = ryan_score - apeach_score
+                    answer[0] = copy.deepcopy(ryan_score_counter)
+                elif ryan_score - apeach_score == score_tracking[0]:
+                    for i in range(11):
+                        if ryan_score_counter[i] > apeach_score_counter[i]:
+                            answer[0] = copy.deepcopy(ryan_score_counter)
+                            break
+            return
+
+        for score in range(10, -1, -1):
+            apeach_score, ryan_score = calculate_scores(ryan_score_counter)
+
+            if (
+                ryan_score > apeach_score
+                and ryan_score_counter[score] > apeach_score_counter[score]
+            ):
+                continue
+
+            ryan_score_counter[score] += 1
+            if answer[0] != ryan_score_counter:
+                search(num_shoot + 1, ryan_score_counter)
+            ryan_score_counter[score] -= 1
+
+    search(0, defaultdict(int))
+    decision = answer[0]
+    if decision == -1:
+        return [-1]
+    else:
+        output = []
+        for score in range(10, -1, -1):
+            output.append(decision[score])
+        return output
+```
+
+표준 라이브러리를 사용한 더 간결한 풀이
+```python
+from collections import Counter, defaultdict
+from itertools import combinations_with_replacement
+from typing import Sequence, List, Mapping
+
+
+def solution(n: int, info: Sequence[int]) -> List[int]:
+    def calculate_scores(ryan_score_counter: Mapping[int, int]):
+        _apeach_score, _ryan_score = 0, 0
+        for score in range(11):
+            if ryan_score_counter[score] > apeach_score_counter[score]:
+                _ryan_score += score
+            elif apeach_score_counter[score] > 0:
+                _apeach_score += score
+        return _ryan_score, _apeach_score
+
+    def convert_to_list(counter: Mapping[int, int]) -> List[int]:
+        result = []
+        for score in range(10, -1, -1):
+            result.append(counter[score])
+        return result
+
+    apeach_score_counter = Counter()
+    for index, value in enumerate(info):
+        apeach_score_counter[10 - index] = value
+
+    max_diff = 0
+    answer = defaultdict(int)
+    for combination in combinations_with_replacement(range(11), n):
+        current_score_counter = Counter(combination)
+        ryan_score, apeach_score = calculate_scores(current_score_counter)
+
+        if ryan_score - apeach_score > max_diff:
+            max_diff = ryan_score - apeach_score
+            answer = current_score_counter
+
+    return [-1] if not answer else convert_to_list(answer)
+
+
+assert solution(5, [2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]) == [
+    0,
+    2,
+    2,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
+assert solution(1, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == [-1]
+assert solution(9, [0, 0, 1, 2, 0, 1, 1, 1, 1, 1, 1]) == [
+    1,
+    1,
+    2,
+    0,
+    1,
+    2,
+    2,
+    0,
+    0,
+    0,
+    0,
+]
+assert solution(10, [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3]) == [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    2,
+]
+```
