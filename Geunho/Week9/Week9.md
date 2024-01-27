@@ -351,3 +351,9 @@ def solution(n: int, weak: List[int], dist: List[int]) -> int:
 assert solution(12, [1, 5, 6, 10], [1, 2, 3, 4]) == 2
 assert solution(12, [1, 3, 4, 9, 10], [3, 5, 7]) == 1
 ```
+
+#### [사라지는 발판](https://school.programmers.co.kr/learn/courses/30/lessons/92345)
+
+프로그래머스 풀이가 더 직관적이어서 링크로 대체, 추후에 다시 풀어볼 것
+
+- https://school.programmers.co.kr/questions/38680
