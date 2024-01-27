@@ -307,3 +307,47 @@ assert solution(10, [0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 3]) == [
     2,
 ]
 ```
+
+#### [외벽 점검](https://school.programmers.co.kr/learn/courses/30/lessons/60062)
+
+weak 자료구조를 확장해서 시계, 반시계를 시계만 고려하게 문제 조건을 완화하고,
+담당할 수 있는 친구를 어떻게 경우의 수 처리를 할 지 (순열)를 캐치해야 풀 수 있는 문제  
+구현 난이도도 사실 쉽지는 않다, 커버 불가능하면 인덱스 연산을 갱신하는 부분 등
+
+```python
+import math
+from itertools import permutations
+from typing import List
+
+
+def solution(n: int, weak: List[int], dist: List[int]) -> int:
+    num_of_weak_points = len(weak)
+
+    weak.extend([x + n for x in weak])
+
+    answer = math.inf
+    # 1, 5, 6, 10, 13, 17, 18, 22
+    # 1, 5, 6, 10
+    # 5, 6, 10, 13
+    # 6, 10, 13, 17
+    # 10, 13, 17, 18
+    for i in range(num_of_weak_points):
+        for friend_order in permutations(dist):
+            friend_count = 1
+            position = weak[i] + friend_order[friend_count - 1]
+
+            for j in range(i, i + num_of_weak_points):
+                if position < weak[j]:
+                    friend_count += 1
+                    if friend_count > len(dist):
+                        break
+                    position = weak[j] + friend_order[friend_count - 1]
+
+            answer = min(answer, friend_count)
+
+    return answer if answer <= len(dist) else - 1
+
+
+assert solution(12, [1, 5, 6, 10], [1, 2, 3, 4]) == 2
+assert solution(12, [1, 3, 4, 9, 10], [3, 5, 7]) == 1
+```
