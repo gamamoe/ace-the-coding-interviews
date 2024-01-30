@@ -13,7 +13,6 @@ def solution(arr1, arr2):
   res.extend(arr1[i:])
   res.extend(arr2[j:])
   
-  print(res)
   return res
 
 assert solution([1, 3, 5], [2, 4, 6]) == [1, 2, 3, 4, 5, 6]
