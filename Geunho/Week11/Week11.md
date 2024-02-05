@@ -208,3 +208,31 @@ assert solution("110010101001") == [3, 8]
 assert solution("01110") == [3, 3]
 assert solution("1111111") == [4, 1]
 ```
+
+### [롤케이크 자르기](https://school.programmers.co.kr/learn/courses/30/lessons/132265)
+
+앞에서부터 자르고, 토핑의 종류를 비교하는 구현  
+왼쪽 토핑 종류와 오른쪽 토핑 종류를 저장할 counter 객체를 만든 후 슬라이딩하면서 넣고 빼면서 key의 갯수를 확인하는 식으로 풀이
+
+```python
+from collections import Counter
+from typing import Sequence
+
+
+def solution(topping: Sequence[int]) -> int:
+    answer = 0
+
+    left_toppings = Counter()
+    right_toppings = Counter(topping)
+    for _topping in topping:
+        left_toppings[_topping] += 1
+        right_toppings[_topping] -= 1
+        
+        if right_toppings[_topping] == 0:
+            right_toppings.pop(_topping)
+
+        if len(left_toppings) == len(right_toppings):
+            answer += 1
+
+    return answer
+```
