@@ -236,3 +236,34 @@ def solution(topping: Sequence[int]) -> int:
 
     return answer
 ```
+
+### [카펫](https://school.programmers.co.kr/learn/courses/30/lessons/42842)
+
+총 블럭의 갯수를 알 수 있고, 가로 길이는 세로보다 길다는 조건이 있으므로  
+총 블럭 갯수부터 하나씩 줄여가면서 가로, 세로 쌍을 구한 후  
+valid 한지 체크 하면서 구현
+
+```python
+from typing import List
+
+
+def solution(brown: int, yellow: int) -> List[int]:
+    def is_valid(_width: int, _height: int) -> bool:
+        return brown == 2 * (_width + _height - 2)
+
+    answer = []
+    num_blocks = brown + yellow
+    for width in range(num_blocks, 0, -1):
+        height, remainder = divmod(num_blocks, width)
+
+        if remainder == 0 and is_valid(width, height):
+            answer = [width, height]
+            break
+
+    return answer
+
+
+assert solution(10, 2) == [4, 3]
+assert solution(8, 1) == [3, 3]
+assert solution(24, 24) == [8, 6]
+```
