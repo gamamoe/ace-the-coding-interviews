@@ -267,3 +267,35 @@ assert solution(10, 2) == [4, 3]
 assert solution(8, 1) == [3, 3]
 assert solution(24, 24) == [8, 6]
 ```
+
+### [캐릭터의 좌표](https://school.programmers.co.kr/learn/courses/30/lessons/120861)
+
+2차원 리스트에서 좌표 이동은 이전 장에서도 많이 다뤘던 문제라 크게 어렵지 않게 풀이 가능  
+시작점이 0, 0이고 보드 사이즈에 따라 valid 하지 않는 값만 주의하면 됨
+
+```python
+from typing import Sequence, List
+
+
+def solution(keyinput: Sequence[str], board: Sequence[int]) -> List[int]:
+    def is_valid(y: int, x: int) -> bool:
+        return -y_limit <= y <= y_limit and -x_limit <= x <= x_limit
+
+    y_limit, x_limit = [(b - 1) // 2 for b in board]
+    offset_by_key = {"up": (0, 1), "down": (0, -1), "left": (-1, 0), "right": (1, 0)}
+    current_coordinate = [0, 0]
+    for key in keyinput:
+        offset = offset_by_key[key]
+        next_coordinate = [
+            current_coordinate[0] + offset[0],
+            current_coordinate[1] + offset[1],
+        ]
+        if is_valid(next_coordinate[0], next_coordinate[1]):
+            current_coordinate = next_coordinate
+
+    return current_coordinate
+
+
+assert solution(["down", "down", "down", "down", "down"], [7, 9]) == [0, -4]
+assert solution(["left", "right", "up", "right", "right"], [11, 11]) == [2, 1]
+```
