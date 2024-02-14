@@ -1,5 +1,91 @@
-### 정렬
+### 정렬 개념
 
+정렬이란 사용자가 정의한 순서로 데이터를 나열하는 것
+
+- 오름차순
+- 내림차순
+- 임의의 조건
+
+정렬이 된 데이터에서는 원하는 데이터를 쉽게 찾을 수 있기 때문에 효율적
+
+#### 병합 정렬
+
+전형적인 분할-정복 방식의 정렬 알고리즘  
+매 과정에서 반씩 분할 후, 분할된 데이터의 크기가 1일 때부터 정렬된 순서로 합병하는 방식
+
+#### 힙 정렬
+
+힙의 특징을 이용해서 최솟값 또는 최댓값을 반복적으로 pop하면 결국 정렬된 데이터를 얻을 수 있게됨  
+파이썬에서는 heapq의 여러가지 메서드를 활용해서 우선순위 큐 연산들을 지원할 수 있다  
+
+#### 위상 정렬
+
+방향이 있고 cycle이 없는 graph (DAG)에서 태스크의 순서를 정렬하는 알고리즘  
+각 노드로 들어오는 input stream의 차수를 기준으로 초기화를 하고, 큐를 이용해서 집어넣은 후  
+차수가 0인 노드를 팝하면서 downstream으로 연결된 노드의 차수를 -1씩 감소하면서 반복  
+
+#### 계수 정렬
+
+카운팅 정렬이라고도 불리며, 몇 가지 한계 케이스 (음수 또는 sparse 배열, 너무 큰 range)가 아닌 경우  
+효율적으로 정렬이 가능함 (비교 정렬과 다르게 선형시간에 정렬 가능)
+
+### 몸풀기 문제
+
+#### 계수 정렬 구현하기
+
+문제 조건에서 알파벳 소문자라는 조건이 있으므로, 작은 범위만 볼 수 있으므로 계수 정렬을 적용할 수 있는 좋은 예제  
+Python의 ord나 chr 함수를 알아야 쉽게 풀이 가능
+
+```python
+def solution(s: str) -> str:
+    counts = [0] * 26
+    for char in s:
+        counts[ord(char) - ord("a")] += 1
+
+    answer = []
+    for index, count in enumerate(counts):
+        for _ in range(count):
+            answer.append(chr(index + ord("a")))
+
+    return "".join(answer)
+
+
+assert solution("hello") == "ehllo"
+assert solution("algorithm") == "aghilmort"
+```
+
+#### 정렬이 완료된 두 배열 합치기
+
+교재 풀이와 거의 유사함, 다만 arr1 또는 arr2 중 하나가 끝났다면, 간단하게 extend를 활용해서 붙이는 부분만 조금 차이
+
+```python
+from typing import Sequence, List
+
+
+def solution(arr1: Sequence[int], arr2: Sequence[int]) -> List[int]:
+    answer = []
+
+    ptr1 = 0
+    ptr2 = 0
+    while ptr1 < len(arr1) and ptr2 < len(arr2):
+        if arr1[ptr1] <= arr2[ptr2]:
+            answer.append(arr1[ptr1])
+            ptr1 += 1
+        else:
+            answer.append(arr2[ptr2])
+            ptr2 += 1
+
+    if ptr1 == len(arr1):
+        answer.extend(arr2[ptr2:])
+    else:
+        answer.extend(arr1[ptr1:])
+
+    return answer
+
+
+assert solution([1, 3, 5], [2, 4, 6]) == [1, 2, 3, 4, 5, 6]
+assert solution([1, 2, 3], [4, 5, 6]) == [1, 2, 3, 4, 5, 6]
+```
 
 ### 실전 문제
 
@@ -48,6 +134,37 @@ def solution(array: Sequence[int], commands: Sequence[Sequence[int]]) -> List[in
         sorted_sub_array = sorted(array[i - 1:j])
         answer.append(sorted_sub_array[k - 1])
     return answer
+```
+
+#### [가장 큰 수](https://school.programmers.co.kr/learn/courses/30/lessons/42746)
+
+파이썬에서 제공하는 cmp_to_key 를 활용해서 문제 조건에 맞게 사용자 정의 정렬을 하는 연습 문제  
+a가 b보다 선이라면 음수 값을, 동등하다면 0을, a가 b보다 후라면 양수 값을 반환하는 식으로 cmp 함수를 작성하면 된다  
+reference: https://docs.python.org/ko/3/library/functools.html#functools.cmp_to_key
+
+> A comparison function is any callable that accepts two arguments, compares them, 
+> and returns a negative number for less-than, zero for equality, or a positive number for greater-than. 
+> A key function is a callable that accepts one argument and returns another value to be used as the sort key.
+
+```python
+from functools import cmp_to_key
+from typing import Sequence
+
+
+def solution(numbers: Sequence[int]) -> str:
+    def _compare(a: int, b: int) -> int:
+        c1 = f"{a}{b}"
+        c2 = f"{b}{a}"
+        return int(c1) - int(c2)
+
+    sorted_numbers = sorted(numbers, key=cmp_to_key(_compare), reverse=True)
+    answer = "".join(str(x) for x in sorted_numbers)
+    return "0" if int(answer) == 0 else answer
+
+
+assert solution([6, 10, 2]) == "6210"
+assert solution([3, 30, 34, 5, 9]) == "9534330"
+assert solution([0, 0, 0]) == "0"
 ```
 
 #### [튜플](https://school.programmers.co.kr/learn/courses/30/lessons/64065)
@@ -117,6 +234,60 @@ def solution(s: str) -> List[int]:
         prev = x
 
     return [int(x) for x in answer]
+```
+
+#### [지형 이동](https://school.programmers.co.kr/learn/courses/30/lessons/62050)
+
+최소 비용, 그리고 인접한 노드끼리 이동 가능하다는 점에서 BFS를 떠올리고, 
+이동 비용이 작은 순으로 방문 처리를 하므로 우선순위 큐를 착안할 수 있어야한다  
+원점부터 시작하여 상, 하, 좌, 우 인접한 칸의 cost와 좌표를 우선순위 큐에 넣고  
+우선순위 큐에서 cost가 작은 순으로 뽑아 내고 또 상, 하, 좌, 우 탐색  
+방문처리 하는 시점은 일반적인 BFS와 좀 다르므로 유의할 것
+
+```python
+import heapq
+from typing import Sequence
+
+
+def solution(land: Sequence[Sequence[int]], height: int) -> int:
+    dimension = len(land)
+    visited = [[False] * dimension for _ in range(dimension)]
+    start = (0, 0, 0)  # cost, row, col
+    queue = [start]
+    heapq.heapify(queue)
+
+    answer = 0
+    while queue:
+        cost, row, col = heapq.heappop(queue)
+
+        if visited[row][col]:
+            continue
+
+        answer += cost
+        visited[row][col] = True
+        for drow, dcol in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            new_row, new_col = row + drow, col + dcol
+
+            if (
+                0 <= new_row < dimension
+                and 0 <= new_col < dimension
+                and not visited[new_row][new_col]
+            ):
+                if (diff := abs(land[row][col] - land[new_row][new_col])) <= height:
+                    heapq.heappush(queue, (0, new_row, new_col))
+                else:
+                    heapq.heappush(queue, (diff, new_row, new_col))
+
+    return answer
+
+
+assert (
+    solution([[1, 4, 8, 10], [5, 5, 5, 5], [10, 10, 10, 10], [10, 10, 10, 20]], 3) == 15
+)
+assert (
+    solution([[10, 11, 10, 11], [2, 21, 20, 10], [1, 20, 21, 11], [2, 1, 2, 1]], 1)
+    == 18
+)
 ```
 
 ### 추가 문제
