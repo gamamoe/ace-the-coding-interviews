@@ -84,3 +84,76 @@ def solution(nums: Sequence[int]) -> int:
 assert solution([1, 4, 2, 3, 1, 5, 7, 3]) == 5
 assert solution([3, 2, 1]) == 1
 ```
+
+### 조약돌 문제 
+
+초항이 네 가지 패턴이 있다는 점과, 네 가지 경우에 대해서 max 값을 앞에서부터 갱신해나가는 점화식 세우는 것이 포인트  
+쉽지는 않다
+
+```python
+from typing import Sequence
+
+
+def solution(arr: Sequence[Sequence[int]]) -> int:
+    num_of_cols = len(arr[0])
+    dp = [[0] * num_of_cols for _ in range(4)]
+
+    dp[0][0] = arr[0][0]
+    dp[1][0] = arr[1][0]
+    dp[2][0] = arr[2][0]
+    dp[3][0] = arr[0][0] + arr[2][0]
+
+    for i in range(1, num_of_cols):
+        dp[0][i] = arr[0][i] + max(dp[1][i - 1], dp[2][i - 1])
+        dp[1][i] = arr[1][i] + max(dp[0][i - 1], dp[2][i - 1], dp[3][i - 1])
+        dp[2][i] = arr[2][i] + max(dp[0][i - 1], dp[1][i - 1])
+        dp[3][i] = arr[0][i] + arr[2][i] + dp[1][i - 1]
+
+    return max(dp[0][-1], dp[1][-1], dp[2][-1], dp[3][-1])
+
+
+assert solution([[1, 3, 3, 2], [2, 1, 4, 1], [1, 5, 2, 3]]) == 19
+assert solution([[1, 7, 13, 2, 6], [2, -4, 2, 5, 4], [5, 3, 5, -3, 1]]) == 32
+```
+
+## 실전 문제
+
+### [피보나치 수](https://school.programmers.co.kr/learn/courses/30/lessons/12945)
+
+너무 전형적인 DP 문제, modulo 처리를 해주는 부분만 신경쓰면 어렵지 않게 풀이 가능
+
+```shell
+def solution(n: int) -> int:
+    dp = [0] * 100_001
+    dp[1] = 1
+
+    modulo = 1234567
+    for index in range(2, n + 1):
+        dp[index] = (dp[index - 1] % modulo + dp[index - 2] % modulo) % modulo
+
+    return dp[n]
+```
+
+### [2 x n 타일링](https://school.programmers.co.kr/learn/courses/30/lessons/12900)
+
+그림을 그리면서 규칙을 찾자  
+`dp[1]` 길이가 1을 만족하는 경우는 세로 막대 하나인 **1가지**  
+`dp[2]` 길이가 2를 만족하는 경우는 세로 막대 2개 또는 가로 막대 2개인 **2가지**
+그 후 n에 대해서는 일반화를 바로 앞 항 (n - 1)에서 세로 막대를 하나씩 붙이거나, 2항 앞인 (n - 1)에서 가로 막대 2개를 붙이는 경우의 합  
+따라서 피보나치 수열과 거의 유사하게 계산할 수 있다
+
+```python
+def solution(n: int) -> int:
+    dp = [0] * 60_001
+    dp[1] = 1
+    dp[2] = 2
+
+    modulo = 1_000_000_007
+    for index in range(3, n + 1):
+        dp[index] = (dp[index - 1] % modulo + dp[index - 2] % modulo) % modulo
+
+    return dp[n]
+
+
+assert solution(4) == 5
+```
