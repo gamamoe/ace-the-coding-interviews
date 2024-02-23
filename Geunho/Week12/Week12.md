@@ -209,3 +209,64 @@ def solution(land: List[List[int]]) -> int:
 
 assert solution([[1, 2, 3, 5], [5, 6, 7, 8], [4, 3, 2, 1]]) == 16
 ```
+### [가장 큰 정사각형 찾기](https://school.programmers.co.kr/learn/courses/30/lessons/12905)
+
+정사각형의 성질을 이용해서 1개, 2개, 3개가 1x1 3개, 2x2 3개, ... 반복하면서 큰 사각형을 만들 수 있다는 점이 아이디어  
+처음 DP로 접근하는 것이 쉽지는 않은 것 같다
+
+```python
+from typing import List
+
+
+def solution(board: List[List[int]]) -> int:
+    num_of_rows = len(board)
+    num_of_cols = len(board[0])
+
+    for row_index in range(1, num_of_rows):
+        for col_index in range(1, num_of_cols):
+            if board[row_index][col_index] == 1:
+                board[row_index][col_index] = (
+                    min(
+                        board[row_index][col_index - 1],
+                        board[row_index - 1][col_index - 1],
+                        board[row_index - 1][col_index],
+                    )
+                    + 1
+                )
+
+    max_len = max([max(row) for row in board])
+    return max_len**2
+
+
+assert solution([[0, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [0, 0, 1, 0]]) == 9
+assert solution([[0, 0, 1, 1], [1, 1, 1, 1]]) == 4
+```
+
+### [단어 퍼즐](https://school.programmers.co.kr/learn/courses/30/lessons/12983)
+
+앞에서부터 무식하게 조각 수를 카운팅하는 방식에서 발전해서 가능한 토큰의 길이를 활용해서 dp 테이블을 세우는 문제  
+본문에도 있지만 문자열이랑 결합한 문제라 쉽지 않다
+
+```python
+import math
+from typing import Sequence
+
+
+def solution(strs: Sequence[str], t: str) -> int:
+    n = len(t)
+    dp = [math.inf] * (n + 1)
+    dp[0] = 0
+    sizes = set(len(s) for s in strs)
+    str_set = set(strs)
+    for i in range(1, n + 1):
+        for size in sizes:
+            if i - size >= 0 and t[i - size : i] in str_set:
+                dp[i] = min(dp[i], dp[i - size] + 1)
+
+    return dp[n] if dp[n] < math.inf else -1
+
+
+assert solution(["ba", "na", "n", "a"], "banana") == 3
+assert solution(["app", "ap", "p", "l", "e", "ple", "pp"], "apple") == 2
+assert solution(["ba", "an", "nan", "ban", "n"], "banana") == -1
+```
