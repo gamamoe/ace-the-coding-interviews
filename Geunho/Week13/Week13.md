@@ -112,3 +112,71 @@ def solution(people: List[int], limit: int) -> int:
 assert solution([70, 50, 80, 50], 100) == 3
 assert solution([70, 80, 50], 100) == 3
 ```
+
+### [귤 고르기](https://school.programmers.co.kr/learn/courses/30/lessons/138476)
+
+종류를 최소화 하는 것이 목적이므로, 사이즈별로 빈도를 세고 빈도가 낮은 사이즈부터 걸러내는 식으로 그리디하게 접근  
+바꿔 생각하면 특정 사이즈에 빈도가 많다면 골라냈을 때 이득이 없다는 것을 캐치하면 쉽게 풀이 가능하다
+
+```python
+import collections
+from typing import Sequence
+
+
+def solution(k: int, tangerine: Sequence[int]) -> int:
+    count_by_size = collections.Counter(tangerine)
+    sorted_sizes = sorted(count_by_size.keys(), key=lambda x: count_by_size[x])
+
+    num_of_tangerines = len(tangerine) - k
+    for size in sorted_sizes:
+        if count_by_size[size] > num_of_tangerines:
+            break
+
+        num_of_tangerines -= count_by_size[size]
+        count_by_size.pop(size)
+
+    return len(count_by_size)
+
+
+assert solution(6, [1, 3, 2, 5, 4, 5, 2, 3]) == 3
+assert solution(4, [1, 3, 2, 5, 4, 5, 2, 3]) == 2
+assert solution(2, [1, 1, 1, 1, 2, 2, 2, 3]) == 1
+```
+
+### [기지국 설치](https://school.programmers.co.kr/learn/courses/30/lessons/12979)
+
+정확성은 다 통과하지만 효율성에서 통과되지 않는 풀이
+
+```python
+from typing import Sequence
+
+
+def solution(n: int, stations: Sequence[int], w: int) -> int:
+    coverages = [False] * n
+    for station in stations:
+        start = max(0, station - 1 - w)
+        end = min(station -1 + w, n - 1)
+
+        for index in range(start, end + 1):
+            coverages[index] = True
+
+    answer = 0
+    temp_container = []
+    for index in range(n):
+        if coverages[index]:
+            if temp_container:
+                temp_container = []
+                answer += 1
+        else:
+            if len(temp_container) < 2 * w + 1:
+                temp_container.append(index)
+            else:
+                temp_container = [index]
+                answer += 1
+
+    return answer + 1 if temp_container else answer
+
+
+assert solution(11, [4, 11], 1) == 3
+assert solution(16, [9], 2) == 3
+```
