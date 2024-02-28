@@ -180,3 +180,30 @@ def solution(n: int, stations: Sequence[int], w: int) -> int:
 assert solution(11, [4, 11], 1) == 3
 assert solution(16, [9], 2) == 3
 ```
+
+1부터 순서대로 이동하면서 해당 좌표가 설치된 기지국의 바운더리에 있는 지 없는 지 확인하면서 좌표를 업데이트  
+해당 좌표가 기지국 바운더리에 없으면 loc - w < loc < loc + w를 커버할 수 있도록 하고 좌표를 업데이트  
+해당 좌표가 기지국 바운더리에 있다면, 기지국이 설치된 위치 + w + 1로 좌표를 업데이트하면 빠짐 없이 커버가 가능해진다  
+
+```python
+from typing import Sequence
+
+
+def solution(n: int, stations: Sequence[int], w: int) -> int:
+    location = 1
+    answer = 0
+    station_index = 0
+    while location <= n:
+        if station_index < len(stations) and location >= stations[station_index] - w:
+            location = stations[station_index] + w + 1
+            station_index += 1
+        else:
+            location += 2 * w + 1
+            answer += 1
+
+    return answer
+
+
+assert solution(16, [9], 2) == 3
+assert solution(11, [4, 11], 1) == 3
+```
