@@ -268,6 +268,23 @@ assert solution(8, 1) == [3, 3]
 assert solution(24, 24) == [8, 6]
 ```
 
+### [점프와 순간 이동](https://school.programmers.co.kr/learn/courses/30/lessons/12980)
+
+N의 제한이 크고, 완전 탐색이 어렵다는 것에서 규칙을 찾아야한다는 것을 캐치해야 함  
+순간이동으로 이동한 위치의 수는 짝수라는 점과 최소 점프를 해야하므로 홀수인 경우 바로 뒷칸으로 이동  
+도착점에서 반으로 나눠가면서 아이디어를 만드는 것도 방법일 것 같음  
+이런 유형을 처음 만나면 쉽게 풀이하긴 어려울 것 같다
+
+```python
+def solution(n: int) -> int:
+    return bin(n).count("1")
+
+
+assert solution(5000) == 5
+assert solution(5) == 2
+assert solution(6) == 2
+```
+
 ### [캐릭터의 좌표](https://school.programmers.co.kr/learn/courses/30/lessons/120861)
 
 2차원 리스트에서 좌표 이동은 이전 장에서도 많이 다뤘던 문제라 크게 어렵지 않게 풀이 가능  
